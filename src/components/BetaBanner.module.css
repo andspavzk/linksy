@@ -1,0 +1,37 @@
+.banner {
+  height: 32px;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 12.5px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+
+.banner strong { font-weight: 700; }
+
+.link {
+  color: rgba(255,255,255,.85);
+  text-decoration: underline;
+}
+.link:hover { color: #fff; }
+
+.close {
+  position: absolute;
+  right: 12px;
+  background: rgba(255,255,255,.2);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .12s;
+}
+.close:hover { background: rgba(255,255,255,.35); }

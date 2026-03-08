@@ -1,0 +1,150 @@
+.page {
+  min-height: 100vh;
+  background: #09090e;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.glow {
+  position: absolute;
+  top: -100px; left: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(43,91,222,.14) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 18px;
+  padding: 28px;
+  position: relative;
+  z-index: 1;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+.backBtn {
+  display: flex; align-items: center; gap: 7px;
+  background: none; border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px; padding: 7px 14px;
+  color: rgba(255,255,255,.55); font-size: 13px;
+  font-family: inherit; transition: all .15s;
+}
+.backBtn:hover { color: #fff; border-color: rgba(255,255,255,.25); }
+.logoutBtn {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(229,57,53,.1); border: 1px solid rgba(229,57,53,.2);
+  border-radius: 8px; padding: 7px 14px;
+  color: #f87171; font-size: 13px;
+  font-family: inherit; transition: all .15s;
+}
+.logoutBtn:hover { background: rgba(229,57,53,.18); }
+
+.avatarSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+.avatar {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+.displayName { font-size: 17px; font-weight: 700; color: #fff; }
+.tag { font-size: 12px; color: rgba(255,255,255,.35); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+.email { font-size: 12px; color: rgba(255,255,255,.25); margin-top: 4px; }
+
+.section { margin-bottom: 24px; }
+.sectionTitle {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .09em; text-transform: uppercase;
+  color: rgba(255,255,255,.3); margin-bottom: 12px;
+}
+
+.colorGrid {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.colorSwatch {
+  width: 34px; height: 34px;
+  border-radius: 50%; border: 2px solid transparent;
+  transition: all .15s; cursor: pointer;
+}
+.colorSwatch:hover { transform: scale(1.1); }
+.colorActive { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 0 2px rgba(255,255,255,.3); }
+
+.field { margin-bottom: 14px; }
+.label {
+  font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,.45); display: block; margin-bottom: 7px;
+}
+.input {
+  width: 100%;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13.5px; color: #fff;
+  font-family: inherit; outline: none;
+  transition: border-color .15s;
+}
+.input:focus { border-color: rgba(91,141,239,.6); }
+.input::placeholder { color: rgba(255,255,255,.2); }
+.fieldHint { font-size: 11px; color: rgba(255,255,255,.2); margin-top: 4px; display: block; text-align: right; }
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.statusBtn {
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.5);
+  font-size: 13px; font-family: inherit;
+  transition: all .15s; text-align: left;
+}
+.statusBtn:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.8); }
+.statusActive { border-color: rgba(91,141,239,.5); background: rgba(43,91,222,.15); color: #7b8af8; }
+
+.saveBtn {
+  width: 100%;
+  padding: 12px 0;
+  border-radius: 10px; border: none;
+  background: linear-gradient(135deg,#2b5bde,#7b5ea7);
+  color: #fff; font-size: 14.5px; font-weight: 600;
+  font-family: inherit; display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+  transition: all .18s;
+  box-shadow: 0 4px 16px rgba(43,91,222,.35);
+}
+.saveBtn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(43,91,222,.45); }
+.saveBtn:disabled { opacity: .7; cursor: not-allowed; }
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

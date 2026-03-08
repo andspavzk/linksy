@@ -1,0 +1,72 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f0f2f5;
+  --sb: #ffffff;
+  --sb-hov: #f4f4f5;
+  --sb-act: #e8f0fe;
+  --main: #dfe8f1;
+  --b-out: #effdde;
+  --b-in: #ffffff;
+  --hdr: #ffffff;
+  --inp: #ffffff;
+  --accent: #2b5bde;
+  --accent-l: #e8f0fe;
+  --accent-h: #1a4acf;
+  --green: #4fae4e;
+  --green-l: #edfde8;
+  --red: #e53935;
+  --yellow: #f9a825;
+  --purple: #7b5ea7;
+  --t1: #111111;
+  --t2: #707579;
+  --t3: #aaaaaa;
+  --border: #e4e4e7;
+  --sh: 0 1px 3px rgba(0,0,0,.07);
+  --sh2: 0 4px 20px rgba(0,0,0,.12);
+}
+
+[data-theme="dark"] {
+  --bg: #1c2128;
+  --sb: #212b36;
+  --sb-hov: #28303d;
+  --sb-act: #1e3358;
+  --main: #161f2a;
+  --b-out: #1e3a5c;
+  --b-in: #2a3545;
+  --hdr: #1e2736;
+  --inp: #2a3545;
+  --accent: #5b8def;
+  --accent-l: #1a2e54;
+  --accent-h: #4a7de0;
+  --green-l: #1a2e1a;
+  --t1: #e8eaed;
+  --t2: #8a9bb0;
+  --t3: #4a5568;
+  --border: #2a3444;
+  --sh: 0 1px 3px rgba(0,0,0,.3);
+  --sh2: 0 4px 20px rgba(0,0,0,.5);
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+button { font-family: inherit; cursor: pointer; }
+textarea, input { font-family: inherit; }
+
+::selection { background: var(--accent-l); }

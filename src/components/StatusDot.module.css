@@ -1,0 +1,13 @@
+.dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--sb);
+}
+.online  { background: var(--green); }
+.idle    { background: var(--yellow); }
+.dnd     { background: var(--red); }
+.offline { background: var(--t3); }
