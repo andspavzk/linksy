@@ -16,7 +16,6 @@ export default function AuthPage({ mode }: { mode: Mode }) {
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -28,7 +27,7 @@ export default function AuthPage({ mode }: { mode: Mode }) {
       if (password.length < 6) { setError('Şifre en az 6 karakter olmalı.'); setLoading(false); return }
       const err = await signUp(email, password, username.trim())
       if (err) { setError(err); setLoading(false); return }
-      setSuccess(true)
+      navigate('/app')
     } else {
       const err = await signIn(email, password)
       if (err) { setError('E-posta veya şifre hatalı.'); setLoading(false); return }
@@ -41,23 +40,6 @@ export default function AuthPage({ mode }: { mode: Mode }) {
   async function handleGoogle() {
     setError(null)
     await signInWithGoogle()
-  }
-
-  if (success) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.card}>
-          <div className={styles.successIcon}>✅</div>
-          <h2 className={styles.successTitle}>Hesabın oluşturuldu!</h2>
-          <p className={styles.successDesc}>
-            E-postana bir doğrulama bağlantısı gönderdik. Bağlantıya tıkladıktan sonra giriş yapabilirsin.
-          </p>
-          <button className={styles.submitBtn} onClick={() => navigate('/login')}>
-            Giriş Yap
-          </button>
-        </div>
-      </div>
-    )
   }
 
   return (
