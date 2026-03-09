@@ -1,188 +1,131 @@
 .panel {
   width: 240px;
-  background: var(--hdr);
-  border-left: 1px solid var(--border);
+  background: var(--bg-dark);
+  border-left: 1px solid rgba(0,0,0,.24);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
 }
-
-.voiceCard {
-  margin: 8px 6px 4px;
-  background: linear-gradient(135deg, rgba(43,91,222,.07), rgba(123,94,167,.07));
-  border: 1px solid rgba(43,91,222,.18);
-  border-radius: 10px;
-  padding: 10px;
-  flex-shrink: 0;
-}
-.vcHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-.vcTitle {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--green);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.vcTitle::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: .5; transform: scale(.75); }
-}
-.vcChan { font-size: 10.5px; color: var(--t3); }
-
-.vcGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
-  margin-bottom: 8px;
-}
-.vcUser {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 7px 4px;
-  background: var(--sb);
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  transition: border-color .15s;
-}
-.vcUser.speaking { border-color: var(--green); }
-.vcAv {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-}
-.speaking .vcAv { box-shadow: 0 0 0 2.5px var(--green); }
-.vcName { font-size: 10px; color: var(--t2); text-align: center; }
-.vcMic { font-size: 11px; }
-
-.vcActions { display: flex; gap: 5px; }
-.vcMute, .vcLeave {
-  flex: 1;
-  padding: 6px 0;
-  border-radius: 8px;
-  border: none;
-  font-family: inherit;
-  font-size: 11.5px;
-  font-weight: 600;
-  transition: all .12s;
-}
-.vcMute { background: rgba(43,91,222,.1); color: var(--accent); }
-.vcMute:hover { background: var(--accent-l); }
-.vcLeave { background: rgba(229,57,53,.1); color: var(--red); }
-.vcLeave:hover { background: rgba(229,57,53,.18); }
 
 .tabs {
   display: flex;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  padding: 0 12px;
 }
 .tab {
-  flex: 1;
-  padding: 11px 0;
-  text-align: center;
-  font-size: 11px;
+  padding: 12px 8px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .05em;
+  letter-spacing: .02em;
   color: var(--t3);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: all .12s;
+  transition: all .15s;
 }
 .tab:hover { color: var(--t2); }
-.tabActive { color: var(--accent) !important; border-bottom-color: var(--accent) !important; }
+.tabActive { color: var(--t1); border-bottom-color: var(--t1); }
 
-.scroll { flex: 1; overflow-y: auto; padding: 4px 0; }
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 8px;
+}
 
 .roleGroup {
-  padding: 10px 12px 3px;
-  font-size: 10px;
+  padding: 12px 8px 4px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: .09em;
   text-transform: uppercase;
+  letter-spacing: .02em;
   color: var(--t3);
 }
-.roleCount { font-weight: 600; }
+.roleCount { font-weight: 500; }
 
 .member {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  margin: 1px 4px;
-  border-radius: 8px;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
   cursor: pointer;
-  transition: background .12s;
+  transition: background .1s;
 }
-.member:hover { background: var(--sb-hov); }
+.member:hover { background: var(--bg-hover); }
 
 .av {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
   position: relative;
   flex-shrink: 0;
 }
 
 .info { flex: 1; min-width: 0; }
 .name {
-  font-size: 12.5px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--t1);
-}
-.botTag {
-  font-size: 9px;
-  font-weight: 700;
-  background: var(--accent-l);
-  color: var(--accent);
-  padding: 1px 4px;
-  border-radius: 3px;
 }
 .activity {
   font-size: 11px;
-  color: var(--t3);
+  color: var(--t-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .roleTag {
-  font-size: 9.5px;
-  font-weight: 700;
-  padding: 2px 5px;
-  border-radius: 9999px;
-  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--r-full);
 }
+.botTag {
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--accent);
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: var(--r-sm);
+  margin-left: 4px;
+}
+
+.voiceCard {
+  margin: 8px;
+  background: var(--bg-light);
+  border-radius: var(--r-md);
+  padding: 12px;
+}
+.vcHead { margin-bottom: 8px; }
+.vcTitle { font-size: 12px; font-weight: 700; color: var(--t1); }
+.vcChan { font-size: 11px; color: var(--t3); margin-left: 6px; }
+.vcGrid { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.vcUser { display: flex; align-items: center; gap: 4px; }
+.speaking { }
+.vcAv {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 10px; font-weight: 700;
+}
+.vcName { font-size: 11px; color: var(--t2); }
+.vcMic { font-size: 10px; }
+.vcActions { display: flex; gap: 6px; }
+.vcMute, .vcLeave {
+  flex: 1; padding: 6px; border-radius: var(--r-sm);
+  border: none; font-size: 11px; font-weight: 600; cursor: pointer;
+  background: var(--bg-hover); color: var(--t2);
+}
+.vcMute:hover { background: var(--bg-active); }
+.vcLeave { color: var(--red); }
+.vcLeave:hover { background: var(--red-light); }

@@ -1,64 +1,72 @@
 .rail {
-  width: 58px;
-  background: var(--sb);
-  border-right: 1px solid var(--border);
+  width: 72px;
+  background: var(--bg-darkest);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px 0 10px;
-  gap: 2px;
+  padding: 12px 0 8px;
+  gap: 4px;
   flex-shrink: 0;
   z-index: 10;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent), var(--purple));
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(43, 91, 222, .3);
-  transition: transform .15s;
+  transition: border-radius .3s var(--ease), background .2s;
 }
-.logo:hover { transform: scale(1.05); }
+.logo:hover { border-radius: 12px; background: var(--accent-hover); }
 
 .btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--t2);
+  color: var(--t3);
   background: transparent;
   border: none;
   flex-shrink: 0;
-  transition: all .15s;
+  transition: all .2s var(--ease);
   font-size: 17px;
   position: relative;
 }
-.btn:hover { background: var(--sb-hov); color: var(--t1); }
-.btn.active { background: var(--accent-l); color: var(--accent); }
+.btn:hover {
+  background: var(--bg-light);
+  color: var(--t1);
+  border-radius: 16px;
+}
+.btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 16px;
+}
 .btn.active::before {
   content: '';
   position: absolute;
-  left: -9px;
-  width: 3px;
-  height: 22px;
-  background: var(--accent);
-  border-radius: 0 3px 3px 0;
+  left: -12px;
+  width: 4px;
+  height: 24px;
+  background: var(--t1);
+  border-radius: 0 4px 4px 0;
+  transition: height .2s var(--ease);
 }
 
 .server {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,61 +75,81 @@
   font-weight: 700;
   color: #fff;
   position: relative;
-  transition: all .18s;
+  transition: border-radius .3s var(--ease), transform .1s;
   flex-shrink: 0;
   letter-spacing: .3px;
 }
-.server:hover { border-radius: 50%; transform: scale(1.06); }
-.serverActive { border-radius: 50%; outline: 3px solid var(--accent); outline-offset: 2px; }
+.server:hover { border-radius: 16px; }
+.server::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  width: 4px;
+  height: 0;
+  background: var(--t1);
+  border-radius: 0 4px 4px 0;
+  transition: height .2s var(--ease);
+}
+.server:hover::before { height: 20px; }
+.serverActive {
+  border-radius: 16px;
+}
+.serverActive::before { height: 36px !important; }
 
 .badge {
   position: absolute;
-  top: -3px;
-  right: -3px;
+  bottom: -2px;
+  right: -2px;
   background: var(--red);
   color: #fff;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  min-width: 14px;
-  height: 14px;
-  border-radius: 9999px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: var(--r-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 3px;
-  border: 2px solid var(--sb);
+  padding: 0 4px;
+  border: 3px solid var(--bg-darkest);
 }
 
 .sep {
-  width: 28px;
-  height: 1px;
-  background: var(--border);
-  margin: 3px 0;
+  width: 32px;
+  height: 2px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  margin: 4px 0;
   flex-shrink: 0;
 }
 
 .addBtn {
-  width: 38px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: var(--green-l);
+  background: var(--bg-dark);
   color: var(--green);
   font-size: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px dashed var(--green);
-  transition: all .15s;
+  border: none;
+  transition: all .3s var(--ease);
   flex-shrink: 0;
   line-height: 1;
 }
-.addBtn:hover { background: var(--green); color: #fff; border-style: solid; }
+.addBtn:hover {
+  background: var(--green);
+  color: #fff;
+  border-radius: 16px;
+}
 
 .bottom {
   margin-top: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
+  padding-top: 4px;
 }

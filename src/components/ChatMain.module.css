@@ -7,35 +7,19 @@
   position: relative;
 }
 
-.main::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(0,0,0,.025) 1px, transparent 1px);
-  background-size: 20px 20px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-[data-theme="dark"] .main::before {
-  background-image: radial-gradient(circle, rgba(255,255,255,.015) 1px, transparent 1px);
-}
-
 .chDesc {
-  padding: 12px 16px;
-  background: var(--hdr);
+  padding: 16px 16px 12px;
   border-bottom: 1px solid var(--border);
-  position: relative;
-  z-index: 1;
   flex-shrink: 0;
 }
 .chDescTitle {
-  font-size: 19px;
+  font-size: 28px;
   font-weight: 800;
   color: var(--t1);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 .chDescSub {
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--t2);
+  line-height: 1.5;
 }

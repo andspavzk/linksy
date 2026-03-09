@@ -1,13 +1,13 @@
 .dot {
-  position: absolute;
-  bottom: 0;
-  right: 0;
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid var(--sb);
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  border: 2.5px solid var(--bg-dark);
 }
-.online  { background: var(--green); }
-.idle    { background: var(--yellow); }
-.dnd     { background: var(--red); }
-.offline { background: var(--t3); }
+.online { background: var(--status-online); }
+.idle { background: var(--status-idle); }
+.dnd { background: var(--status-dnd); }
+.offline { background: var(--status-offline); }

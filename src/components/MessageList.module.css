@@ -1,7 +1,7 @@
 .list {
   flex: 1;
   overflow-y: auto;
-  padding: 12px 8px 6px;
+  padding: 16px 0 8px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -11,123 +11,152 @@
 .dateSep {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 0 8px;
+  gap: 8px;
+  padding: 8px 16px;
+  margin: 8px 0;
 }
 .dateSep::before,
 .dateSep::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--border);
+  background: var(--border-strong);
 }
 .dateSep span {
   font-size: 11px;
+  font-weight: 700;
   color: var(--t3);
-  background: var(--main);
-  padding: 3px 10px;
-  border-radius: 9999px;
-  border: 1px solid var(--border);
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: .02em;
 }
 
 .msgRow {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 6px 8px;
-  border-radius: 8px;
+  gap: 16px;
+  padding: 2px 48px 2px 72px;
   position: relative;
+  min-height: 44px;
 }
 .msgRow:hover {
-  background: rgba(255,255,255,.03);
+  background: rgba(0,0,0,.06);
 }
 .msgRow.pinned {
-  border-left: 2px solid #f5c542;
-  background: rgba(245,197,66,.03);
+  border-left: 2px solid var(--yellow);
+  background: var(--yellow-light);
+  padding-left: 70px;
 }
 .msgRow.compact {
-  padding-top: 1px;
-  padding-bottom: 1px;
+  min-height: auto;
+  padding-top: 0;
+  padding-bottom: 0;
 }
+
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   flex-shrink: 0;
+  position: absolute;
+  left: 16px;
+  margin-top: 2px;
+  cursor: pointer;
+  transition: opacity .15s;
 }
+.avatar:hover { opacity: .8; }
+.avatar:active { transform: translateY(1px); }
+
 .avatarSpacer {
-  width: 36px;
-  flex-shrink: 0;
+  display: none;
 }
+
 .msgBody {
   flex: 1;
   min-width: 0;
 }
+
 .msgHeader {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin-bottom: 2px;
+  gap: 8px;
 }
+
 .authorName {
-  font-weight: 700;
-  font-size: 13.5px;
-  color: var(--t1, #fff);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--t1);
+  cursor: pointer;
 }
+.authorName:hover { text-decoration: underline; }
+
 .tag {
-  font-size: 11px;
-  color: var(--t3, rgba(255,255,255,.35));
+  font-size: 10px;
+  color: var(--t-muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
 }
+
 .time {
-  font-size: 10.5px;
-  color: var(--t3, rgba(255,255,255,.3));
+  font-size: 11px;
+  color: var(--t-muted);
+  font-weight: 500;
 }
+
 .msgContent {
-  font-size: 13.5px;
-  color: var(--t2, rgba(255,255,255,.8));
-  line-height: 1.45;
+  font-size: 14px;
+  color: var(--t2);
+  line-height: 1.5;
   word-break: break-word;
 }
+
+/* Hover action toolbar */
 .msgActions {
   display: none;
-  gap: 4px;
+  gap: 0;
   position: absolute;
-  right: 8px;
-  top: 4px;
+  right: 16px;
+  top: -16px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  box-shadow: var(--sh-elevated);
+  overflow: hidden;
 }
 .msgRow:hover .msgActions {
   display: flex;
 }
 .msgActions button {
-  background: var(--card, rgba(255,255,255,.06));
-  border: 1px solid var(--border, rgba(255,255,255,.08));
-  border-radius: 6px;
-  color: var(--t3, rgba(255,255,255,.4));
+  background: none;
+  border: none;
+  color: var(--t3);
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 6px 8px;
   display: flex;
   align-items: center;
+  transition: background .1s, color .1s;
 }
 .msgActions button:hover {
-  color: #fff;
-  background: rgba(255,255,255,.1);
+  color: var(--t1);
+  background: var(--bg-hover);
 }
 
+/* Typing indicator */
 .typing {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 4px 2px 0;
-  font-size: 11.5px;
+  gap: 8px;
+  padding: 4px 16px 0;
+  font-size: 12px;
   color: var(--t3);
-  min-height: 22px;
+  min-height: 24px;
+  font-weight: 500;
 }
 .dots { display: flex; gap: 3px; }
 .dots span {
@@ -141,5 +170,5 @@
 .dots span:nth-child(3) { animation-delay: .4s; }
 @keyframes td {
   0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-4px); }
+  30% { transform: translateY(-3px); }
 }
