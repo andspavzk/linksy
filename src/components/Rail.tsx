@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { MessageSquare, Volume2, Users, Settings, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import styles from './Rail.module.css'
@@ -34,7 +34,7 @@ export function Rail() {
       <button className={styles.btn} title="Sesli Kanallar">
         <Volume2 size={18} />
       </button>
-      <button className={styles.btn} title="ArkadaÅŸlar">
+      <button className={styles.btn} title="Arkadaşlar">
         <Users size={18} />
       </button>
 
@@ -65,7 +65,7 @@ export function Rail() {
             border: '1px solid rgba(255,255,255,.08)',
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ color: '#fff', margin: 0, fontSize: 16 }}>Yeni Sunucu OluÅŸtur</h3>
+              <h3 style={{ color: '#fff', margin: 0, fontSize: 16 }}>Yeni Sunucu Oluştur</h3>
               <button onClick={() => setShowCreate(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', cursor: 'pointer' }}>
                 <X size={18} />
               </button>
@@ -73,7 +73,7 @@ export function Rail() {
             <input
               value={serverName}
               onChange={e => setServerName(e.target.value)}
-              placeholder="Sunucu adÄ±..."
+              placeholder="Sunucu adı..."
               style={{
                 width: '100%', padding: '10px 14px', borderRadius: 10,
                 background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)',
@@ -92,7 +92,7 @@ export function Rail() {
                 opacity: creating || !serverName.trim() ? 0.5 : 1,
               }}
             >
-              {creating ? 'OluÅŸturuluyor...' : 'OluÅŸtur'}
+              {creating ? 'Oluşturuluyor...' : 'Oluştur'}
             </button>
           </div>
         </div>
@@ -101,10 +101,10 @@ export function Rail() {
       <div className={styles.bottom}>
         <button
           className={styles.btn}
-          title={theme === 'light' ? 'KaranlÄ±k Mod' : 'AydÄ±nlÄ±k Mod'}
+          title={theme === 'light' ? 'Karanlık Mod' : 'Aydınlık Mod'}
           onClick={toggleTheme}
         >
-          {theme === 'light' ? 'ðŸŒ™' : 'â˜€ï¸'}
+          {theme === 'light' ? '🌙' : '☀️'}
         </button>
         <button className={styles.btn} title="Ayarlar">
           <Settings size={17} />

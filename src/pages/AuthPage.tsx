@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import styles from './AuthPage.module.css'
 
 type Mode = 'login' | 'register'
-type View = 'form' | 'forgot' | 'email-sent' | 'confirm-email'
+type View = 'form' | 'forgot' | 'email-sent'
 
 export default function AuthPage({ mode }: { mode: Mode }) {
   const navigate = useNavigate()
@@ -25,22 +25,16 @@ export default function AuthPage({ mode }: { mode: Mode }) {
     setLoading(true)
 
     if (mode === 'register') {
-      if (username.trim().length < 2) { setError('Kullanıcı adı en az 2 karakter olmalı.'); setLoading(false); return }
-      if (password.length < 6) { setError('Şifre en az 6 karakter olmalı.'); setLoading(false); return }
+      if (username.trim().length < 2) { setError('Kullanici adi en az 2 karakter olmali.'); setLoading(false); return }
+      if (password.length < 6) { setError('Sifre en az 6 karakter olmali.'); setLoading(false); return }
       const err = await signUp(email, password, username.trim())
-      if (err === 'CONFIRM_EMAIL') {
-        setView('confirm-email')
-        setLoading(false)
-        return
-      }
       if (err) { setError(err); setLoading(false); return }
       navigate('/app')
     } else {
       const err = await signIn(email, password)
-      if (err) { setError('E-posta veya şifre hatalı.'); setLoading(false); return }
+      if (err) { setError(err); setLoading(false); return }
       navigate('/app')
     }
-
     setLoading(false)
   }
 
@@ -57,30 +51,9 @@ export default function AuthPage({ mode }: { mode: Mode }) {
 
   async function handleGoogle() {
     setError(null)
-    await signInWithGoogle()
-  }
-
-  if (view === 'confirm-email') {
-    return (
-      <div className={styles.page}>
-        <div className={styles.glow} />
-        <div className={styles.glow2} />
-        <div className={styles.card}>
-          <div className={styles.successIcon}>📧</div>
-          <h1 className={styles.title}>E-postanı kontrol et</h1>
-          <p className={styles.subtitle}>
-            <strong>{email}</strong> adresine onay bağlantısı gönderdik.
-            Bağlantıya tıklayarak hesabını aktif edebilirsin.
-          </p>
-          <p className={styles.subtitle} style={{ marginTop: 8, opacity: 0.6, fontSize: 13 }}>
-            E-posta gelmedi mi? Spam klasörünü kontrol et.
-          </p>
-          <button className={styles.submitBtn} onClick={() => { setView('form'); setError(null) }} style={{ marginTop: 16 }}>
-            Giriş sayfasına dön
-          </button>
-        </div>
-      </div>
-    )
+    const err = await signInWithGoogle()
+    if (err) { setError(err); return }
+    navigate('/app')
   }
 
   if (view === 'email-sent') {
@@ -89,14 +62,13 @@ export default function AuthPage({ mode }: { mode: Mode }) {
         <div className={styles.glow} />
         <div className={styles.glow2} />
         <div className={styles.card}>
-          <div className={styles.successIcon}>✉️</div>
-          <h1 className={styles.title}>Bağlantı gönderildi</h1>
+          <div className={styles.successIcon}>&#9993;</div>
+          <h1 className={styles.title}>Baglanti gonderildi</h1>
           <p className={styles.subtitle}>
-            <strong>{email}</strong> adresine şifre sıfırlama bağlantısı gönderdik.
-            E-postadaki linke tıklayarak yeni şifreni belirleyebilirsin.
+            <strong>{email}</strong> adresine sifre sifirlama baglantisi gonderdik.
           </p>
           <button className={styles.submitBtn} onClick={() => { setView('form'); setError(null) }} style={{ marginTop: 16 }}>
-            Giriş sayfasına dön
+            Giris sayfasina don
           </button>
         </div>
       </div>
@@ -110,31 +82,21 @@ export default function AuthPage({ mode }: { mode: Mode }) {
         <div className={styles.glow2} />
         <div className={styles.card}>
           <button className={styles.backLink} onClick={() => { setView('form'); setError(null) }}>
-            <ArrowLeft size={14} /> Geri dön
+            <ArrowLeft size={14} /> Geri don
           </button>
-          <h1 className={styles.title}>Şifreni sıfırla</h1>
-          <p className={styles.subtitle}>
-            E-posta adresini gir, sana sıfırlama bağlantısı gönderelim.
-          </p>
+          <h1 className={styles.title}>Sifreni sifirla</h1>
+          <p className={styles.subtitle}>E-posta adresini gir, sana sifirlama baglantisi gondeRelim.</p>
           <form className={styles.form} onSubmit={handleForgotPassword}>
             <div className={styles.field}>
               <label className={styles.label}>E-posta</label>
               <div className={styles.inputWrap}>
                 <Mail size={16} className={styles.inputIcon} />
-                <input
-                  className={styles.input}
-                  type="email"
-                  placeholder="sen@ornek.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                />
+                <input className={styles.input} type="email" placeholder="sen@ornek.com" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
               </div>
             </div>
             {error && <div className={styles.error}>{error}</div>}
             <button className={styles.submitBtn} type="submit" disabled={loading}>
-              {loading ? <span className={styles.spinner} /> : 'Sıfırlama Bağlantısı Gönder'}
+              {loading ? <span className={styles.spinner} /> : 'Sifirlama Baglantisi Gonder'}
             </button>
           </form>
         </div>
@@ -146,7 +108,6 @@ export default function AuthPage({ mode }: { mode: Mode }) {
     <div className={styles.page}>
       <div className={styles.glow} />
       <div className={styles.glow2} />
-
       <div className={styles.card}>
         <Link to="/" className={styles.logoRow}>
           <div className={styles.logoIcon}>
@@ -159,17 +120,15 @@ export default function AuthPage({ mode }: { mode: Mode }) {
         </Link>
 
         <h1 className={styles.title}>
-          {mode === 'login' ? 'Tekrar hoş geldin 👋' : 'Hesap Oluştur'}
+          {mode === 'login' ? 'Tekrar hos geldin' : 'Hesap Olustur'}
         </h1>
         <p className={styles.subtitle}>
-          {mode === 'login'
-            ? 'Hesabına giriş yap, sohbete katıl.'
-            : 'Ücretsiz hesap aç, beta\'ya katıl.'}
+          {mode === 'login' ? 'Hesabina giris yap, sohbete katil.' : 'Ucretsiz hesap ac, betaya katil.'}
         </p>
 
         <button className={styles.googleBtn} onClick={handleGoogle}>
           <Chrome size={17} />
-          Google ile {mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol'}
+          Google ile {mode === 'login' ? 'Giris Yap' : 'Kayit Ol'}
         </button>
 
         <div className={styles.divider}><span>veya e-posta ile</span></div>
@@ -177,83 +136,48 @@ export default function AuthPage({ mode }: { mode: Mode }) {
         <form className={styles.form} onSubmit={handleSubmit}>
           {mode === 'register' && (
             <div className={styles.field}>
-              <label className={styles.label}>Kullanıcı Adı</label>
+              <label className={styles.label}>Kullanici Adi</label>
               <div className={styles.inputWrap}>
                 <User size={16} className={styles.inputIcon} />
-                <input
-                  className={styles.input}
-                  type="text"
-                  placeholder="linksy_kullanici"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  required
-                  autoComplete="username"
-                />
+                <input className={styles.input} type="text" placeholder="linksy_kullanici" value={username} onChange={e => setUsername(e.target.value)} required autoComplete="username" />
               </div>
             </div>
           )}
-
           <div className={styles.field}>
             <label className={styles.label}>E-posta</label>
             <div className={styles.inputWrap}>
               <Mail size={16} className={styles.inputIcon} />
-              <input
-                className={styles.input}
-                type="email"
-                placeholder="sen@ornek.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
+              <input className={styles.input} type="email" placeholder="sen@ornek.com" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
             </div>
           </div>
-
           <div className={styles.field}>
             <label className={styles.label}>
-              Şifre
+              Sifre
               {mode === 'login' && (
                 <button type="button" className={styles.forgotLink} onClick={() => { setView('forgot'); setError(null) }}>
-                  Şifremi unuttum
+                  Sifremi unuttum
                 </button>
               )}
             </label>
             <div className={styles.inputWrap}>
               <Lock size={16} className={styles.inputIcon} />
-              <input
-                className={styles.input}
-                type={showPass ? 'text' : 'password'}
-                placeholder={mode === 'register' ? 'En az 6 karakter' : '••••••••'}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              />
-              <button
-                type="button"
-                className={styles.eyeBtn}
-                onClick={() => setShowPass(v => !v)}
-                tabIndex={-1}
-              >
+              <input className={styles.input} type={showPass ? 'text' : 'password'} placeholder={mode === 'register' ? 'En az 6 karakter' : '********'} value={password} onChange={e => setPassword(e.target.value)} required autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+              <button type="button" className={styles.eyeBtn} onClick={() => setShowPass(v => !v)} tabIndex={-1}>
                 {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
-
           {error && <div className={styles.error}>{error}</div>}
-
           <button className={styles.submitBtn} type="submit" disabled={loading}>
-            {loading
-              ? <span className={styles.spinner} />
-              : mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur'}
+            {loading ? <span className={styles.spinner} /> : mode === 'login' ? 'Giris Yap' : 'Hesap Olustur'}
           </button>
         </form>
 
         <div className={styles.switchRow}>
           {mode === 'login' ? (
-            <>Hesabın yok mu? <Link to="/register" className={styles.switchLink}>Kayıt Ol</Link></>
+            <>Hesabin yok mu? <Link to="/register" className={styles.switchLink}>Kayit Ol</Link></>
           ) : (
-            <>Zaten hesabın var mı? <Link to="/login" className={styles.switchLink}>Giriş Yap</Link></>
+            <>Zaten hesabin var mi? <Link to="/login" className={styles.switchLink}>Giris Yap</Link></>
           )}
         </div>
       </div>

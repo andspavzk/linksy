@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, LogOut, Save } from 'lucide-react'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db } from '../lib/firebase'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../lib/supabase'
 import styles from './ProfilePage.module.css'
 
 const STATUS_OPTIONS = [
-  { value: 'online', label: '🟢 Çevrimiçi' },
-  { value: 'idle', label: '🟡 Boşta' },
-  { value: 'dnd', label: '🔴 Rahatsız Etme' },
-  { value: 'offline', label: '⚫ Görünmez' },
+  { value: 'online', label: 'Cevrimici' },
+  { value: 'idle', label: 'Bosta' },
+  { value: 'dnd', label: 'Rahatsiz Etme' },
+  { value: 'offline', label: 'Gorunmez' },
 ]
 
 const AVATAR_COLORS = [
@@ -30,19 +31,19 @@ export default function ProfilePage() {
   const [username, setUsername] = useState(profile?.username ?? '')
   const [activity, setActivity] = useState(profile?.activity ?? '')
   const [status, setStatus] = useState(profile?.status ?? 'online')
-  const [avatarColor, setAvatarColor] = useState(profile?.avatar_color ?? AVATAR_COLORS[0])
+  const [avatarColor, setAvatarColor] = useState(profile?.avatarColor ?? AVATAR_COLORS[0])
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
   async function handleSave() {
     if (!user) return
     setSaving(true)
-    await supabase.from('profiles').update({
+    await updateDoc(doc(db, 'profiles', user.uid), {
       username: username.trim(),
       activity: activity.trim() || null,
       status,
-      avatar_color: avatarColor,
-    }).eq('id', user.id)
+      avatarColor,
+    })
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -56,16 +57,13 @@ export default function ProfilePage() {
   return (
     <div className={styles.page}>
       <div className={styles.glow} />
-
       <div className={styles.card}>
         <div className={styles.topBar}>
           <button className={styles.backBtn} onClick={() => navigate('/app')}>
-            <ArrowLeft size={16} />
-            Geri Dön
+            <ArrowLeft size={16} /> Geri Don
           </button>
           <button className={styles.logoutBtn} onClick={handleSignOut}>
-            <LogOut size={14} />
-            Çıkış
+            <LogOut size={14} /> Cikis
           </button>
         </div>
 
@@ -74,7 +72,7 @@ export default function ProfilePage() {
             {username?.[0]?.toUpperCase() ?? '?'}
           </div>
           <div className={styles.avatarInfo}>
-            <div className={styles.displayName}>{username || 'Kullanıcı'}</div>
+            <div className={styles.displayName}>{username || 'Kullanici'}</div>
             <div className={styles.tag}>{profile?.tag ?? '#0000'}</div>
             <div className={styles.email}>{user?.email}</div>
           </div>
@@ -96,38 +94,20 @@ export default function ProfilePage() {
 
         <div className={styles.section}>
           <div className={styles.sectionTitle}>Profil Bilgileri</div>
-
           <div className={styles.field}>
-            <label className={styles.label}>Kullanıcı Adı</label>
-            <input
-              className={styles.input}
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              placeholder="kullanici_adi"
-            />
+            <label className={styles.label}>Kullanici Adi</label>
+            <input className={styles.input} value={username} onChange={e => setUsername(e.target.value)} placeholder="kullanici_adi" />
           </div>
-
           <div className={styles.field}>
-            <label className={styles.label}>Aktivite / Durum Mesajı</label>
-            <input
-              className={styles.input}
-              value={activity}
-              onChange={e => setActivity(e.target.value)}
-              placeholder="💻 VS Code ile çalışıyor..."
-              maxLength={64}
-            />
+            <label className={styles.label}>Aktivite / Durum Mesaji</label>
+            <input className={styles.input} value={activity} onChange={e => setActivity(e.target.value)} placeholder="VS Code ile calisiyor..." maxLength={64} />
             <span className={styles.fieldHint}>{activity.length}/64</span>
           </div>
-
           <div className={styles.field}>
-            <label className={styles.label}>Çevrimiçi Durumu</label>
+            <label className={styles.label}>Cevrimici Durumu</label>
             <div className={styles.statusGrid}>
               {STATUS_OPTIONS.map(s => (
-                <button
-                  key={s.value}
-                  className={`${styles.statusBtn} ${status === s.value ? styles.statusActive : ''}`}
-                  onClick={() => setStatus(s.value)}
-                >
+                <button key={s.value} className={`${styles.statusBtn} ${status === s.value ? styles.statusActive : ''}`} onClick={() => setStatus(s.value as any)}>
                   {s.label}
                 </button>
               ))}
@@ -136,12 +116,7 @@ export default function ProfilePage() {
         </div>
 
         <button className={styles.saveBtn} onClick={handleSave} disabled={saving || saved}>
-          {saving
-            ? <span className={styles.spinner} />
-            : saved
-            ? '✓ Kaydedildi'
-            : <><Save size={15} /> Değişiklikleri Kaydet</>
-          }
+          {saving ? <span className={styles.spinner} /> : saved ? 'Kaydedildi' : <><Save size={15} /> Degisiklikleri Kaydet</>}
         </button>
       </div>
     </div>

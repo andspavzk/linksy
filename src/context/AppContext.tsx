@@ -1,61 +1,17 @@
-﻿import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
-import { supabase } from '../lib/supabase'
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import {
+  collection, doc, query, where, orderBy, limit, onSnapshot,
+  addDoc, deleteDoc, getDocs, setDoc, getDoc, serverTimestamp,
+} from 'firebase/firestore'
+import { db } from '../lib/firebase'
 import { useAuth } from './AuthContext'
+import type { Server, Category, Channel, Message, Profile } from '../types'
 
-interface DbServer {
-  id: string
-  name: string
-  initials: string
-  color: string
-  owner_id: string
-}
-
-interface DbCategory {
-  id: string
-  server_id: string
-  name: string
-  position: number
-}
-
-interface DbChannel {
-  id: string
-  server_id: string
-  category_id: string | null
-  name: string
-  type: string
-  description: string | null
-  position: number
-}
-
-interface DbMember {
-  server_id: string
-  user_id: string
+interface MemberWithProfile {
+  userId: string
   role: string
-  joined_at: string
-  profile: {
-    id: string
-    username: string
-    tag: string
-    avatar_color: string
-    status: string
-    activity: string | null
-  }
-}
-
-interface RealtimeMessage {
-  id: string
-  channel_id: string
-  content: string
-  created_at: string
-  reply_to: string | null
-  edited: boolean
-  author: {
-    id: string
-    username: string
-    tag: string
-    avatar_color: string
-    status: string
-  }
+  joinedAt: number
+  profile: Profile | null
 }
 
 interface VoiceState {
@@ -69,25 +25,24 @@ interface VoiceState {
 interface AppContextValue {
   theme: 'light' | 'dark'
   toggleTheme: () => void
-  servers: DbServer[]
+  servers: Server[]
   activeServerId: string | null
   setActiveServerId: (id: string) => void
-  categories: DbCategory[]
-  channels: DbChannel[]
-  members: DbMember[]
+  categories: Category[]
+  channels: Channel[]
+  members: MemberWithProfile[]
   activeChannelId: string | null
   setActiveChannelId: (id: string) => void
-  messages: RealtimeMessage[]
+  messages: Message[]
   messagesLoading: boolean
   sendMessage: (content: string, replyTo?: string) => Promise<void>
   deleteMessage: (id: string) => Promise<void>
   voiceState: VoiceState
   leaveVoice: () => void
   toggleMute: () => void
-  replyTo: RealtimeMessage | null
-  setReplyTo: (msg: RealtimeMessage | null) => void
+  replyTo: Message | null
+  setReplyTo: (msg: Message | null) => void
   createServer: (name: string, initials: string) => Promise<void>
-  joinServer: (serverId: string) => Promise<void>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -95,192 +50,157 @@ const AppContext = createContext<AppContextValue | null>(null)
 export function AppProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
-  const [servers, setServers] = useState<DbServer[]>([])
+  const [servers, setServers] = useState<Server[]>([])
   const [activeServerId, setActiveServerId] = useState<string | null>(null)
-  const [categories, setCategories] = useState<DbCategory[]>([])
-  const [channels, setChannels] = useState<DbChannel[]>([])
-  const [members, setMembers] = useState<DbMember[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [channels, setChannels] = useState<Channel[]>([])
+  const [members, setMembers] = useState<MemberWithProfile[]>([])
   const [activeChannelId, setActiveChannelId] = useState<string | null>(null)
-  const [messages, setMessages] = useState<RealtimeMessage[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [messagesLoading, setMessagesLoading] = useState(false)
   const [voiceState, setVoiceState] = useState<VoiceState>({
     connected: false, channelId: null, channelName: null, muted: false, deafened: false,
   })
-  const [replyTo, setReplyTo] = useState<RealtimeMessage | null>(null)
+  const [replyTo, setReplyTo] = useState<Message | null>(null)
 
-  const toggleTheme = useCallback(() => {
-    setTheme(t => t === 'light' ? 'dark' : 'light')
-  }, [])
+  const toggleTheme = useCallback(() => setTheme(t => t === 'light' ? 'dark' : 'light'), [])
 
   useEffect(() => {
     if (!user) return
-    loadServers()
-  }, [user])
+    const q = query(collection(db, 'serverMembers'), where('userId', '==', user.uid))
+    const unsub = onSnapshot(q, async (snap) => {
+      const serverIds = snap.docs.map(d => d.data().serverId as string)
+      if (serverIds.length === 0) { setServers([]); return }
 
-  async function loadServers() {
-    const { data } = await supabase
-      .from('server_members')
-      .select('server_id, servers(*)')
-      .eq('user_id', user!.id)
-
-    if (data && data.length > 0) {
-      const srvs = data.map((d: any) => d.servers).filter(Boolean) as DbServer[]
-      setServers(srvs)
-      if (!activeServerId && srvs.length > 0) {
-        setActiveServerId(srvs[0].id)
+      const srvs: Server[] = []
+      for (const sid of serverIds) {
+        const sDoc = await getDoc(doc(db, 'servers', sid))
+        if (sDoc.exists()) srvs.push({ id: sDoc.id, ...sDoc.data() } as Server)
       }
-    } else {
-      setServers([])
-    }
-  }
+      setServers(srvs)
+      if (!activeServerId && srvs.length > 0) setActiveServerId(srvs[0].id)
+    })
+    return () => unsub()
+  }, [user])
 
   useEffect(() => {
     if (!activeServerId) return
-    loadServerData(activeServerId)
-  }, [activeServerId])
 
-  async function loadServerData(serverId: string) {
-    const [catRes, chRes, memRes] = await Promise.all([
-      supabase.from('categories').select('*').eq('server_id', serverId).order('position'),
-      supabase.from('channels').select('*').eq('server_id', serverId).order('position'),
-      supabase.from('server_members').select(`
-        server_id, user_id, role, joined_at,
-        profile:profiles!server_members_user_id_fkey(id, username, tag, avatar_color, status, activity)
-      `).eq('server_id', serverId),
-    ])
+    const unsubCats = onSnapshot(
+      query(collection(db, 'categories'), where('serverId', '==', activeServerId), orderBy('position')),
+      (snap) => setCategories(snap.docs.map(d => ({ id: d.id, ...d.data() } as Category)))
+    )
 
-    setCategories((catRes.data ?? []) as DbCategory[])
-    setChannels((chRes.data ?? []) as DbChannel[])
-    setMembers((memRes.data as unknown as DbMember[]) ?? [])
-
-    if (chRes.data && chRes.data.length > 0) {
-      const textChannel = chRes.data.find((c: any) => c.type === 'text')
-      if (textChannel && !activeChannelId) {
-        setActiveChannelId(textChannel.id)
-      } else if (textChannel && activeChannelId) {
-        const exists = chRes.data.find((c: any) => c.id === activeChannelId)
-        if (!exists) setActiveChannelId(textChannel.id)
+    const unsubChannels = onSnapshot(
+      query(collection(db, 'channels'), where('serverId', '==', activeServerId), orderBy('position')),
+      (snap) => {
+        const chs = snap.docs.map(d => ({ id: d.id, ...d.data() } as Channel))
+        setChannels(chs)
+        if (chs.length > 0 && !activeChannelId) {
+          const textCh = chs.find(c => c.type === 'text')
+          if (textCh) setActiveChannelId(textCh.id)
+        }
       }
-    }
-  }
+    )
+
+    const unsubMembers = onSnapshot(
+      query(collection(db, 'serverMembers'), where('serverId', '==', activeServerId)),
+      async (snap) => {
+        const mems: MemberWithProfile[] = []
+        for (const d of snap.docs) {
+          const data = d.data()
+          const pDoc = await getDoc(doc(db, 'profiles', data.userId))
+          mems.push({
+            userId: data.userId,
+            role: data.role,
+            joinedAt: data.joinedAt,
+            profile: pDoc.exists() ? (pDoc.data() as Profile) : null,
+          })
+        }
+        setMembers(mems)
+      }
+    )
+
+    return () => { unsubCats(); unsubChannels(); unsubMembers() }
+  }, [activeServerId])
 
   useEffect(() => {
     if (!activeChannelId) return
     setMessagesLoading(true)
     setMessages([])
 
-    supabase
-      .from('messages')
-      .select(`
-        id, channel_id, content, created_at, reply_to, edited,
-        author:profiles!messages_author_id_fkey(id, username, tag, avatar_color, status)
-      `)
-      .eq('channel_id', activeChannelId)
-      .order('created_at', { ascending: true })
-      .limit(100)
-      .then(({ data }) => {
-        setMessages((data as unknown as RealtimeMessage[]) ?? [])
-        setMessagesLoading(false)
-      })
+    const q = query(
+      collection(db, 'messages'),
+      where('channelId', '==', activeChannelId),
+      orderBy('createdAt', 'asc'),
+      limit(100)
+    )
 
-    const sub = supabase
-      .channel(`messages:${activeChannelId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `channel_id=eq.${activeChannelId}` },
-        async (payload) => {
-          const { data } = await supabase
-            .from('messages')
-            .select(`
-              id, channel_id, content, created_at, reply_to, edited,
-              author:profiles!messages_author_id_fkey(id, username, tag, avatar_color, status)
-            `)
-            .eq('id', payload.new.id)
-            .single()
-          if (data) setMessages(prev => [...prev, data as unknown as RealtimeMessage])
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'messages', filter: `channel_id=eq.${activeChannelId}` },
-        (payload) => {
-          setMessages(prev => prev.filter(m => m.id !== payload.old.id))
-        }
-      )
-      .subscribe()
+    const unsub = onSnapshot(q, async (snap) => {
+      const msgs: Message[] = []
+      for (const d of snap.docs) {
+        const data = d.data()
+        let author: Profile | undefined
+        try {
+          const pDoc = await getDoc(doc(db, 'profiles', data.authorId))
+          if (pDoc.exists()) author = pDoc.data() as Profile
+        } catch {}
+        msgs.push({
+          id: d.id,
+          channelId: data.channelId,
+          authorId: data.authorId,
+          content: data.content,
+          replyTo: data.replyTo || null,
+          edited: data.edited || false,
+          createdAt: data.createdAt?.toMillis?.() || data.createdAt || Date.now(),
+          author,
+        })
+      }
+      setMessages(msgs)
+      setMessagesLoading(false)
+    })
 
-    return () => { supabase.removeChannel(sub) }
+    return () => unsub()
   }, [activeChannelId])
-
-  useEffect(() => {
-    if (!activeServerId) return
-
-    const sub = supabase
-      .channel(`presence:${activeServerId}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'profiles' },
-        (payload) => {
-          setMembers(prev => prev.map(m =>
-            m.user_id === payload.new.id
-              ? { ...m, profile: { ...m.profile, ...payload.new } }
-              : m
-          ))
-        }
-      )
-      .subscribe()
-
-    return () => { supabase.removeChannel(sub) }
-  }, [activeServerId])
 
   const sendMessage = useCallback(async (content: string, replyToId?: string) => {
     if (!user || !activeChannelId || !content.trim()) return
-    await supabase.from('messages').insert({
-      channel_id: activeChannelId,
-      author_id: user.id,
+    await addDoc(collection(db, 'messages'), {
+      channelId: activeChannelId,
+      authorId: user.uid,
       content: content.trim(),
-      reply_to: replyToId ?? null,
+      replyTo: replyToId || null,
+      edited: false,
+      createdAt: serverTimestamp(),
     })
     setReplyTo(null)
   }, [user, activeChannelId])
 
   const deleteMessage = useCallback(async (id: string) => {
-    await supabase.from('messages').delete().eq('id', id)
+    await deleteDoc(doc(db, 'messages', id))
   }, [])
 
   const createServer = useCallback(async (name: string, initials: string) => {
     if (!user) return
     const color = 'linear-gradient(135deg,#2b5bde,#7b5ea7)'
-    const { data: server } = await supabase.from('servers').insert({
-      name, initials, color, owner_id: user.id,
-    }).select().single()
-
-    if (server) {
-      await supabase.from('server_members').insert({
-        server_id: server.id, user_id: user.id, role: 'Founder',
-      })
-
-      const { data: cat } = await supabase.from('categories').insert({
-        server_id: server.id, name: 'Genel', position: 0,
-      }).select().single()
-
-      if (cat) {
-        await supabase.from('channels').insert({
-          server_id: server.id, category_id: cat.id, name: 'genel-sohbet', type: 'text', position: 0,
-        })
-      }
-
-      await loadServers()
-      setActiveServerId(server.id)
-    }
-  }, [user])
-
-  const joinServer = useCallback(async (serverId: string) => {
-    if (!user) return
-    await supabase.from('server_members').insert({
-      server_id: serverId, user_id: user.id, role: 'Member',
+    const serverRef = await addDoc(collection(db, 'servers'), {
+      name, initials, color, ownerId: user.uid, createdAt: Date.now(),
     })
-    await loadServers()
+
+    await addDoc(collection(db, 'serverMembers'), {
+      serverId: serverRef.id, userId: user.uid, role: 'Founder', joinedAt: Date.now(),
+    })
+
+    const catRef = await addDoc(collection(db, 'categories'), {
+      serverId: serverRef.id, name: 'Genel', position: 0,
+    })
+
+    await addDoc(collection(db, 'channels'), {
+      serverId: serverRef.id, categoryId: catRef.id,
+      name: 'genel-sohbet', type: 'text', description: 'Genel sohbet kanali', position: 0,
+    })
+
+    setActiveServerId(serverRef.id)
   }, [user])
 
   const leaveVoice = useCallback(() => {
@@ -300,7 +220,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       messages, messagesLoading, sendMessage, deleteMessage,
       voiceState, leaveVoice, toggleMute,
       replyTo, setReplyTo,
-      createServer, joinServer,
+      createServer,
     }}>
       {children}
     </AppContext.Provider>

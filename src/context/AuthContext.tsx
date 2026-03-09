@@ -1,24 +1,24 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import type { User, Session } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
-
-interface Profile {
-  id: string
-  username: string
-  tag: string
-  avatar_color: string
-  status: string
-  activity: string | null
-}
+import {
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  sendPasswordResetEmail,
+  type User,
+} from 'firebase/auth'
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { auth, db, googleProvider } from '../lib/firebase'
+import type { Profile } from '../types'
 
 interface AuthContextValue {
   user: User | null
   profile: Profile | null
-  session: Session | null
   loading: boolean
   signUp: (email: string, password: string, username: string) => Promise<string | null>
   signIn: (email: string, password: string) => Promise<string | null>
-  signInWithGoogle: () => Promise<void>
+  signInWithGoogle: () => Promise<string | null>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<string | null>
   refreshProfile: () => Promise<void>
@@ -43,105 +43,116 @@ function randomTag() {
   return '#' + String(Math.floor(Math.random() * 9999)).padStart(4, '0')
 }
 
+async function ensureProfile(user: User, username?: string): Promise<Profile> {
+  const ref = doc(db, 'profiles', user.uid)
+  const snap = await getDoc(ref)
+
+  if (snap.exists()) {
+    return snap.data() as Profile
+  }
+
+  const profile: Profile = {
+    uid: user.uid,
+    username: username || user.displayName || user.email?.split('@')[0] || 'Kullanici',
+    tag: randomTag(),
+    avatarColor: randomColor(),
+    status: 'online',
+    activity: null,
+    email: user.email || '',
+    createdAt: Date.now(),
+  }
+
+  await setDoc(ref, profile)
+  return profile
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) loadProfile(session.user.id)
-      else setLoading(false)
+    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser)
+      if (firebaseUser) {
+        const p = await ensureProfile(firebaseUser)
+        await updateDoc(doc(db, 'profiles', firebaseUser.uid), { status: 'online' })
+        setProfile({ ...p, status: 'online' })
+      } else {
+        setProfile(null)
+      }
+      setLoading(false)
     })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) loadProfile(session.user.id)
-      else { setProfile(null); setLoading(false) }
-    })
-
-    return () => subscription.unsubscribe()
+    return () => unsub()
   }, [])
 
-  async function loadProfile(userId: string) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    setProfile(data)
-    setLoading(false)
-  }
-
   async function refreshProfile() {
-    if (user) await loadProfile(user.id)
+    if (!user) return
+    const snap = await getDoc(doc(db, 'profiles', user.uid))
+    if (snap.exists()) setProfile(snap.data() as Profile)
   }
 
   async function signUp(email: string, password: string, username: string): Promise<string | null> {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { username: username.trim() },
-        emailRedirectTo: window.location.origin + '/auth/callback',
-      },
-    })
-    if (error) return error.message
-
-    if (data.user) {
-      await supabase.from('profiles').upsert({
-        id: data.user.id,
-        username: username.trim(),
-        tag: randomTag(),
-        avatar_color: randomColor(),
-        status: 'online',
-        activity: null,
-      })
-    }
-
-    if (data.session) {
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password)
+      await ensureProfile(cred.user, username.trim())
       return null
+    } catch (err: any) {
+      if (err.code === 'auth/email-already-in-use') return 'Bu e-posta zaten kullaniliyor.'
+      if (err.code === 'auth/weak-password') return 'Sifre en az 6 karakter olmali.'
+      if (err.code === 'auth/invalid-email') return 'Gecersiz e-posta adresi.'
+      return err.message
     }
-
-    return 'CONFIRM_EMAIL'
   }
 
   async function signIn(email: string, password: string): Promise<string | null> {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) return error.message
-    if (user) {
-      await supabase.from('profiles').update({ status: 'online' }).eq('id', user.id)
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+      return null
+    } catch {
+      return 'E-posta veya sifre hatali.'
     }
-    return null
   }
 
-  async function signInWithGoogle() {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin + '/auth/callback' },
-    })
-  }
-
-  async function resetPassword(email: string): Promise<string | null> {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-password',
-    })
-    return error ? error.message : null
-  }
-
-  async function signOut() {
-    if (user) {
-      await supabase.from('profiles').update({ status: 'offline' }).eq('id', user.id)
+  async function signInWithGoogleFn(): Promise<string | null> {
+    try {
+      const cred = await signInWithPopup(auth, googleProvider)
+      await ensureProfile(cred.user)
+      return null
+    } catch (err: any) {
+      if (err.code === 'auth/popup-closed-by-user') return null
+      return err.message
     }
-    await supabase.auth.signOut()
+  }
+
+  async function resetPasswordFn(email: string): Promise<string | null> {
+    try {
+      await sendPasswordResetEmail(auth, email)
+      return null
+    } catch (err: any) {
+      if (err.code === 'auth/user-not-found') return 'Bu e-posta ile kayitli hesap bulunamadi.'
+      return err.message
+    }
+  }
+
+  async function signOutFn() {
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'profiles', user.uid), { status: 'offline' })
+      } catch {}
+    }
+    await firebaseSignOut(auth)
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signUp, signIn, signInWithGoogle, signOut, resetPassword, refreshProfile }}>
+    <AuthContext.Provider value={{
+      user, profile, loading,
+      signUp, signIn,
+      signInWithGoogle: signInWithGoogleFn,
+      signOut: signOutFn,
+      resetPassword: resetPasswordFn,
+      refreshProfile,
+    }}>
       {children}
     </AuthContext.Provider>
   )

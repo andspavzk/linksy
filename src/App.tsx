@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -9,7 +9,6 @@ import LandingPage from './pages/LandingPage'
 import AuthPage from './pages/AuthPage'
 import ProfilePage from './pages/ProfilePage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
-import { supabase } from './lib/supabase'
 
 function ThemedApp() {
   const { theme } = useApp()
@@ -32,61 +31,17 @@ function AppWrapper() {
   )
 }
 
-function RootRedirect() {
-  const navigate = useNavigate()
-  useEffect(() => {
-    const hash = window.location.hash
-    if (hash.includes('type=recovery')) {
-      navigate('/reset-password' + hash)
-    } else if (hash.includes('type=invite') || hash.includes('access_token')) {
-      navigate('/app')
-    }
-  }, [navigate])
-  return <LandingPage />
-}
-
-function AuthCallback() {
-  const navigate = useNavigate()
-  useEffect(() => {
-    const hash = window.location.hash
-    if (hash.includes('type=recovery')) {
-      navigate('/reset-password' + hash)
-      return
-    }
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate('/app')
-      else navigate('/login')
-    })
-  }, [navigate])
-  return <div style={{ background: '#09090e', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>Yükleniyor...</div>
-}
-
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<RootRedirect />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<AuthPage mode="login" />} />
           <Route path="/register" element={<AuthPage mode="register" />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <AppWrapper />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/app" element={<ProtectedRoute><AppWrapper /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

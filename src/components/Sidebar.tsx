@@ -28,9 +28,9 @@ export function Sidebar() {
   )
 
   const getChannelsForCategory = (catId: string) =>
-    filteredChannels.filter(c => c.category_id === catId)
+    filteredChannels.filter(c => c.categoryId === catId)
 
-  const uncategorizedChannels = filteredChannels.filter(c => !c.category_id)
+  const uncategorizedChannels = filteredChannels.filter(c => !c.categoryId)
 
   const userInitial = profile?.username?.[0]?.toUpperCase() ?? '?'
   const status = (profile?.status ?? 'online') as 'online' | 'idle' | 'dnd' | 'offline'
@@ -41,71 +41,41 @@ export function Sidebar() {
         <span className={styles.title}>{activeServer?.name ?? 'Linksy'}</span>
         <ChevronDown size={14} className={styles.chevron} />
       </div>
-
       <div className={styles.searchWrap}>
-        <span className={styles.searchIcon}>🔍</span>
-        <input
-          className={styles.searchInput}
-          placeholder="Ara..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+        <span className={styles.searchIcon}>&#128269;</span>
+        <input className={styles.searchInput} placeholder="Ara..." value={search} onChange={e => setSearch(e.target.value)} />
       </div>
-
       <div className={styles.scroll}>
         {channels.length === 0 && (
           <div style={{ padding: '24px 16px', textAlign: 'center', color: 'rgba(255,255,255,.35)', fontSize: 13 }}>
-            Henüz kanal yok. Sunucu sahibi kanal ekleyebilir.
+            Henuz kanal yok. Sunucu sahibi kanal ekleyebilir.
           </div>
         )}
-
         {uncategorizedChannels.length > 0 && (
           <div>
             {uncategorizedChannels.map(ch => (
-              <div
-                key={ch.id}
-                className={clsx(
-                  styles.channel,
-                  ch.id === activeChannelId && styles.active,
-                  ch.type === 'voice' && styles.voiceCh,
-                )}
-                onClick={() => setActiveChannelId(ch.id)}
-              >
+              <div key={ch.id} className={clsx(styles.channel, ch.id === activeChannelId && styles.active, ch.type === 'voice' && styles.voiceCh)} onClick={() => setActiveChannelId(ch.id)}>
                 {ch.id === activeChannelId && <span className={styles.dot} />}
-                <ChannelIcon type={ch.type as any} size={15} />
+                <ChannelIcon type={ch.type} size={15} />
                 <span className={styles.chName}>{ch.name}</span>
               </div>
             ))}
           </div>
         )}
-
         {categories.map(cat => {
           const catChannels = getChannelsForCategory(cat.id)
           if (catChannels.length === 0 && search) return null
           const isCollapsed = collapsed.has(cat.id)
-
           return (
             <div key={cat.id}>
-              <div
-                className={clsx(styles.catLabel, isCollapsed && styles.catCollapsed)}
-                onClick={() => toggleCategory(cat.id)}
-              >
+              <div className={clsx(styles.catLabel, isCollapsed && styles.catCollapsed)} onClick={() => toggleCategory(cat.id)}>
                 <span>{cat.name.toUpperCase()}</span>
                 <Plus size={12} onClick={e => e.stopPropagation()} />
               </div>
-
               {!isCollapsed && catChannels.map(ch => (
-                <div
-                  key={ch.id}
-                  className={clsx(
-                    styles.channel,
-                    ch.id === activeChannelId && styles.active,
-                    ch.type === 'voice' && styles.voiceCh,
-                  )}
-                  onClick={() => setActiveChannelId(ch.id)}
-                >
+                <div key={ch.id} className={clsx(styles.channel, ch.id === activeChannelId && styles.active, ch.type === 'voice' && styles.voiceCh)} onClick={() => setActiveChannelId(ch.id)}>
                   {ch.id === activeChannelId && <span className={styles.dot} />}
-                  <ChannelIcon type={ch.type as any} size={15} />
+                  <ChannelIcon type={ch.type} size={15} />
                   <span className={styles.chName}>{ch.name}</span>
                   <div className={styles.chActions}>
                     <button title="Ayarlar"><Settings size={11} /></button>
@@ -117,30 +87,21 @@ export function Sidebar() {
           )
         })}
       </div>
-
       <div className={styles.userPanel}>
-        <div className={styles.avatar} style={{ background: profile?.avatar_color ?? 'linear-gradient(135deg,#2b5bde,#7b5ea7)' }}>
+        <div className={styles.avatar} style={{ background: profile?.avatarColor ?? 'linear-gradient(135deg,#2b5bde,#7b5ea7)' }}>
           {userInitial}
           <StatusDot status={status} />
         </div>
         <div className={styles.userInfo}>
-          <div className={styles.username}>{profile?.username ?? 'Kullanıcı'}</div>
+          <div className={styles.username}>{profile?.username ?? 'Kullanici'}</div>
           <div className={styles.tag}>{profile?.tag ?? '#0000'}</div>
         </div>
         <div className={styles.userBtns}>
-          <button
-            className={clsx(styles.userBtn, voiceState.muted && styles.mutedBtn)}
-            title={voiceState.muted ? 'Mikrofonu Aç' : 'Sessize Al'}
-            onClick={toggleMute}
-          >
+          <button className={clsx(styles.userBtn, voiceState.muted && styles.mutedBtn)} title={voiceState.muted ? 'Mikrofonu Ac' : 'Sessize Al'} onClick={toggleMute}>
             {voiceState.muted ? <MicOff size={15} /> : <Mic size={15} />}
           </button>
-          <button className={styles.userBtn} title="Kulaklık">
-            <Headphones size={15} />
-          </button>
-          <button className={styles.userBtn} title="Ayarlar">
-            <Settings size={15} />
-          </button>
+          <button className={styles.userBtn} title="Kulaklik"><Headphones size={15} /></button>
+          <button className={styles.userBtn} title="Ayarlar"><Settings size={15} /></button>
         </div>
       </div>
     </aside>
