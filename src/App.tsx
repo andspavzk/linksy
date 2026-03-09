@@ -32,9 +32,27 @@ function AppWrapper() {
   )
 }
 
+function RootRedirect() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash.includes('type=recovery')) {
+      navigate('/reset-password' + hash)
+    } else if (hash.includes('type=invite') || hash.includes('access_token')) {
+      navigate('/app')
+    }
+  }, [navigate])
+  return <LandingPage />
+}
+
 function AuthCallback() {
   const navigate = useNavigate()
   useEffect(() => {
+    const hash = window.location.hash
+    if (hash.includes('type=recovery')) {
+      navigate('/reset-password' + hash)
+      return
+    }
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) navigate('/app')
       else navigate('/login')
@@ -48,7 +66,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<AuthPage mode="login" />} />
           <Route path="/register" element={<AuthPage mode="register" />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
