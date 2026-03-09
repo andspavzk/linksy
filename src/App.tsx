@@ -8,6 +8,7 @@ import { BetaBanner } from './components/BetaBanner'
 import LandingPage from './pages/LandingPage'
 import AuthPage from './pages/AuthPage'
 import ProfilePage from './pages/ProfilePage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import { supabase } from './lib/supabase'
 
 function ThemedApp() {
@@ -51,7 +52,7 @@ export default function App() {
           <Route path="/login" element={<AuthPage mode="login" />} />
           <Route path="/register" element={<AuthPage mode="register" />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/" element={<AuthCallback />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route
             path="/app"
             element={
