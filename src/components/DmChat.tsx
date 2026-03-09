@@ -34,18 +34,16 @@ export function DmChat() {
   }
 
   function handleKey(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      submit()
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
   }
 
   if (!activeDmId) {
     return (
       <main className={styles.main}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,.3)', gap: 8 }}>
-          <span style={{ fontSize: 40 }}>&#128172;</span>
-          <span style={{ fontSize: 15 }}>Bir sohbet sec veya yeni bir mesaj baslat</span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--t-muted)', gap: 12 }}>
+          <span style={{ fontSize: 48, opacity: .5 }}>&#128172;</span>
+          <span style={{ fontSize: 16, fontWeight: 600 }}>Bir sohbet sec</span>
+          <span style={{ fontSize: 13 }}>Sol panelden bir DM sec veya yeni mesaj baslat</span>
         </div>
       </main>
     )
@@ -54,45 +52,40 @@ export function DmChat() {
   return (
     <main className={styles.main}>
       <header style={{
-        padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,.06)',
-        display: 'flex', alignItems: 'center', gap: 10,
+        height: 48, padding: '0 16px', display: 'flex', alignItems: 'center', gap: 10,
+        borderBottom: '1px solid rgba(0,0,0,.24)', boxShadow: '0 1px 0 rgba(0,0,0,.2)',
+        flexShrink: 0,
       }}>
         <div style={{
           width: 28, height: 28, borderRadius: '50%',
-          background: activeDm?.otherUser?.avatarColor ?? '#555',
+          background: activeDm?.otherUser?.avatarColor ?? 'var(--bg-light)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: '#fff', fontWeight: 700, fontSize: 12,
         }}>
           {activeDm?.otherUser?.username?.[0]?.toUpperCase() ?? '?'}
         </div>
-        <span style={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>
+        <span style={{ color: 'var(--t1)', fontWeight: 700, fontSize: 15 }}>
           {activeDm?.otherUser?.username ?? 'Kullanici'}
         </span>
       </header>
 
       <div className={msgStyles.list}>
-        {dmLoading && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,.3)' }}>
-            Yukleniyor...
-          </div>
-        )}
+        {dmLoading && <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--t-muted)' }}>Yukleniyor...</div>}
         {!dmLoading && dmMessages.length === 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,.3)', gap: 8 }}>
-            <span style={{ fontSize: 14 }}>Henuz mesaj yok. Ilk mesaji gonder!</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--t-muted)', gap: 8 }}>
+            <span style={{ fontSize: 14 }}>Sohbete basla!</span>
           </div>
         )}
         {dmMessages.map((msg, i) => {
           const prevMsg = dmMessages[i - 1]
           const sameAuthor = prevMsg && prevMsg.authorId === msg.authorId
-          const isMe = msg.authorId === user?.uid
           return (
             <div key={msg.id} className={`${msgStyles.msgRow} ${sameAuthor ? msgStyles.compact : ''}`}>
               {!sameAuthor && (
-                <div className={msgStyles.avatar} style={{ background: msg.author?.avatarColor ?? '#555' }}>
+                <div className={msgStyles.avatar} style={{ background: msg.author?.avatarColor ?? 'var(--bg-light)' }}>
                   {msg.author?.username?.[0]?.toUpperCase() ?? '?'}
                 </div>
               )}
-              {sameAuthor && <div className={msgStyles.avatarSpacer} />}
               <div className={msgStyles.msgBody}>
                 {!sameAuthor && (
                   <div className={msgStyles.msgHeader}>

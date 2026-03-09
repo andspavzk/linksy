@@ -1,75 +1,29 @@
 import { useState } from 'react'
-import { X, Plus, Trash2, Copy, Check, Shield, Hash, Volume2, Megaphone } from 'lucide-react'
+import { X, Plus, Trash2, Copy, Check, Shield, Hash, Volume2, Megaphone, Settings, Users, Link2, Layers } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
 import type { ChannelType } from '../types'
+import styles from './ServerSettingsModal.module.css'
 
 const COLORS = [
-  'linear-gradient(135deg,#2b5bde,#7b5ea7)',
-  'linear-gradient(135deg,#e53935,#f5a623)',
-  'linear-gradient(135deg,#4fae4e,#00bcd4)',
-  'linear-gradient(135deg,#f5c542,#f0855a)',
-  'linear-gradient(135deg,#9c27b0,#5c6bc0)',
-  'linear-gradient(135deg,#ff6b6b,#feca57)',
+  'linear-gradient(135deg,#5865f2,#eb459e)',
+  'linear-gradient(135deg,#57f287,#1abc9c)',
+  'linear-gradient(135deg,#fee75c,#f0b232)',
+  'linear-gradient(135deg,#ed4245,#eb459e)',
+  'linear-gradient(135deg,#5865f2,#57f287)',
+  'linear-gradient(135deg,#eb459e,#fee75c)',
 ]
 
-const CHANNEL_TYPES: { value: ChannelType; label: string; icon: any }[] = [
-  { value: 'text', label: 'Metin', icon: Hash },
-  { value: 'voice', label: 'Ses', icon: Volume2 },
-  { value: 'announcement', label: 'Duyuru', icon: Megaphone },
+const CHANNEL_TYPES: { value: ChannelType; label: string }[] = [
+  { value: 'text', label: 'Metin Kanali' },
+  { value: 'voice', label: 'Ses Kanali' },
+  { value: 'announcement', label: 'Duyuru Kanali' },
 ]
-
-const ROLES = ['Founder', 'Moderator', 'Member']
-
-const overlay: React.CSSProperties = {
-  position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)', display: 'flex',
-  alignItems: 'center', justifyContent: 'center', zIndex: 9999,
-}
-const card: React.CSSProperties = {
-  background: '#1a1a2e', borderRadius: 16, width: 480, maxHeight: '85vh',
-  border: '1px solid rgba(255,255,255,.08)', display: 'flex', flexDirection: 'column',
-  overflow: 'hidden',
-}
-const header: React.CSSProperties = {
-  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-  padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,.06)',
-}
-const body: React.CSSProperties = { padding: '16px 20px', overflowY: 'auto', flex: 1 }
-const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '9px 12px', borderRadius: 8,
-  background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)',
-  color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box',
-}
-const btnPrimary: React.CSSProperties = {
-  padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-  background: 'linear-gradient(135deg,#5b8def,#7b5ea7)', color: '#fff',
-  fontWeight: 600, fontSize: 13,
-}
-const btnDanger: React.CSSProperties = {
-  ...btnPrimary, background: '#e53935',
-}
-const label: React.CSSProperties = {
-  fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)',
-  textTransform: 'uppercase', marginBottom: 6, display: 'block', letterSpacing: 0.5,
-}
-const section: React.CSSProperties = { marginBottom: 20 }
-const row: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
-  borderRadius: 8, background: 'rgba(255,255,255,.03)', marginBottom: 4,
-}
 
 type Tab = 'general' | 'channels' | 'members' | 'invite'
 
 export function ServerSettingsModal() {
-  const {
-    modal, setModal, activeServer, isOwner, isMod,
-    categories, channels, members,
-    updateServer, deleteServer,
-    createCategory, deleteCategory,
-    createChannel, deleteChannel,
-    updateMemberRole, kickMember,
-    getInviteCode,
-  } = useApp()
+  const { modal, setModal, activeServer, isOwner, isMod, categories, channels, members, updateServer, deleteServer, createCategory, deleteCategory, createChannel, deleteChannel, updateMemberRole, kickMember, getInviteCode } = useApp()
   const { user } = useAuth()
 
   const [tab, setTab] = useState<Tab>('general')
@@ -78,17 +32,15 @@ export function ServerSettingsModal() {
   const [newCatName, setNewCatName] = useState('')
   const [newChName, setNewChName] = useState('')
   const [newChType, setNewChType] = useState<ChannelType>('text')
-  const [newChCat, setNewChCat] = useState<string>('')
-  const [newChDesc, setNewChDesc] = useState('')
+  const [newChCat, setNewChCat] = useState('')
   const [copied, setCopied] = useState(false)
   const [saving, setSaving] = useState(false)
 
   if (modal !== 'server-settings' || !activeServer) return null
 
-  const inviteCode = getInviteCode()
-  const inviteLink = `${window.location.origin}/app?join=${inviteCode}`
+  const inviteLink = `${window.location.origin}/app?join=${getInviteCode()}`
 
-  async function handleSaveGeneral() {
+  async function handleSave() {
     setSaving(true)
     const initials = serverName.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
     await updateServer({ name: serverName.trim(), initials, color: serverColor })
@@ -103,201 +55,177 @@ export function ServerSettingsModal() {
 
   async function handleAddChannel() {
     if (!newChName.trim()) return
-    await createChannel(newChName.trim(), newChType, newChCat || null, newChDesc)
+    await createChannel(newChName.trim(), newChType, newChCat || null)
     setNewChName('')
-    setNewChDesc('')
   }
 
-  function handleCopyInvite() {
+  function handleCopy() {
     navigator.clipboard.writeText(inviteLink)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'general', label: 'Genel' },
-    { key: 'channels', label: 'Kanallar' },
-    { key: 'members', label: 'Uyeler' },
-    { key: 'invite', label: 'Davet' },
+  const tabs: { key: Tab; label: string; icon: any }[] = [
+    { key: 'general', label: 'Genel', icon: Settings },
+    { key: 'channels', label: 'Kanallar', icon: Layers },
+    { key: 'members', label: 'Uyeler', icon: Users },
+    { key: 'invite', label: 'Davet', icon: Link2 },
   ]
 
   return (
-    <div style={overlay} onClick={() => setModal(null)}>
-      <div style={card} onClick={e => e.stopPropagation()}>
-        <div style={header}>
-          <h3 style={{ color: '#fff', margin: 0, fontSize: 16 }}>Sunucu Ayarlari</h3>
-          <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', cursor: 'pointer' }}>
-            <X size={18} />
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+    <div className={styles.overlay} onClick={() => setModal(null)}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <aside className={styles.sidebar}>
+          <div className={styles.sidebarTitle}>{activeServer.name}</div>
           {tabs.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)} style={{
-              flex: 1, padding: '10px 0', background: 'none', border: 'none',
-              color: tab === t.key ? '#5b8def' : 'rgba(255,255,255,.4)',
-              borderBottom: tab === t.key ? '2px solid #5b8def' : '2px solid transparent',
-              fontWeight: 600, fontSize: 12, cursor: 'pointer',
-            }}>{t.label}</button>
+            <button key={t.key} className={`${styles.sidebarItem} ${tab === t.key ? styles.sidebarActive : ''}`} onClick={() => setTab(t.key)}>
+              <t.icon size={16} /> {t.label}
+            </button>
           ))}
-        </div>
+        </aside>
 
-        <div style={body}>
+        <main className={styles.content}>
+          <div className={styles.contentHeader}>
+            <h2 className={styles.contentTitle}>{tabs.find(t => t.key === tab)?.label}</h2>
+            <button className={styles.closeBtn} onClick={() => setModal(null)}><X size={20} /></button>
+          </div>
 
-          {tab === 'general' && (
-            <>
-              <div style={section}>
-                <span style={label}>Sunucu Adi</span>
-                <input value={serverName} onChange={e => setServerName(e.target.value)} style={inputStyle} disabled={!isOwner} />
-              </div>
-              <div style={section}>
-                <span style={label}>Sunucu Rengi</span>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {COLORS.map(c => (
-                    <button key={c} onClick={() => isOwner && setServerColor(c)} style={{
-                      width: 32, height: 32, borderRadius: 8, background: c, border: serverColor === c ? '2px solid #fff' : '2px solid transparent',
-                      cursor: isOwner ? 'pointer' : 'default',
-                    }} />
-                  ))}
+          <div className={styles.contentBody}>
+            {tab === 'general' && (
+              <>
+                <div className={styles.field}>
+                  <label className={styles.label}>Sunucu Adi</label>
+                  <input className={styles.input} value={serverName} onChange={e => setServerName(e.target.value)} disabled={!isOwner} />
                 </div>
-              </div>
-              {isOwner && (
-                <>
-                  <button onClick={handleSaveGeneral} disabled={saving} style={{ ...btnPrimary, opacity: saving ? 0.5 : 1 }}>
-                    {saving ? 'Kaydediliyor...' : 'Kaydet'}
+                <div className={styles.field}>
+                  <label className={styles.label}>Sunucu Rengi</label>
+                  <div className={styles.colorRow}>
+                    {COLORS.map(c => (
+                      <button key={c} className={`${styles.colorDot} ${serverColor === c ? styles.colorDotActive : ''}`} style={{ background: c }} onClick={() => isOwner && setServerColor(c)}>
+                        {serverColor === c && <Check size={14} color="#fff" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {isOwner && (
+                  <button className={styles.primaryBtn} onClick={handleSave} disabled={saving}>
+                    {saving ? 'Kaydediliyor...' : 'Degisiklikleri Kaydet'}
                   </button>
-                  <div style={{ marginTop: 32, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,.06)' }}>
-                    <span style={label}>Tehlikeli Bolge</span>
-                    <button onClick={async () => { if (confirm('Sunucuyu silmek istedigine emin misin?')) { await deleteServer(); setModal(null) } }} style={btnDanger}>
+                )}
+                {isOwner && (
+                  <div className={styles.dangerZone}>
+                    <div className={styles.dangerTitle}>Tehlikeli Bolge</div>
+                    <p className={styles.dangerText}>Sunucuyu silmek geri alinamaz. Tum kanallar, mesajlar ve uyeler silinecek.</p>
+                    <button className={styles.dangerBtn} onClick={async () => { if (confirm('Sunucuyu silmek istedigine emin misin?')) { await deleteServer(); setModal(null) } }}>
                       Sunucuyu Sil
                     </button>
                   </div>
-                </>
-              )}
-            </>
-          )}
-
-          {tab === 'channels' && (
-            <>
-              <div style={section}>
-                <span style={label}>Kategoriler</span>
-                {categories.map(cat => (
-                  <div key={cat.id} style={row}>
-                    <span style={{ flex: 1, color: '#fff', fontSize: 13 }}>{cat.name}</span>
-                    {isMod && (
-                      <button onClick={() => deleteCategory(cat.id)} style={{ background: 'none', border: 'none', color: '#e53935', cursor: 'pointer' }}>
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                {isMod && (
-                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    <input value={newCatName} onChange={e => setNewCatName(e.target.value)} placeholder="Kategori adi..." style={{ ...inputStyle, flex: 1 }}
-                      onKeyDown={e => e.key === 'Enter' && handleAddCategory()} />
-                    <button onClick={handleAddCategory} style={btnPrimary}><Plus size={14} /></button>
-                  </div>
                 )}
-              </div>
+              </>
+            )}
 
-              <div style={section}>
-                <span style={label}>Kanallar</span>
-                {channels.map(ch => (
-                  <div key={ch.id} style={row}>
-                    <Hash size={14} style={{ color: 'rgba(255,255,255,.4)' }} />
-                    <span style={{ flex: 1, color: '#fff', fontSize: 13 }}>{ch.name}</span>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,.3)' }}>{ch.type}</span>
-                    {isMod && (
-                      <button onClick={() => deleteChannel(ch.id)} style={{ background: 'none', border: 'none', color: '#e53935', cursor: 'pointer' }}>
-                        <Trash2 size={14} />
-                      </button>
-                    )}
+            {tab === 'channels' && (
+              <>
+                <div className={styles.sectionBlock}>
+                  <div className={styles.sectionHead}>
+                    <span>Kategoriler</span>
+                    <span className={styles.count}>{categories.length}</span>
                   </div>
-                ))}
-                {isMod && (
-                  <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <input value={newChName} onChange={e => setNewChName(e.target.value)} placeholder="Kanal adi..." style={inputStyle} />
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <select value={newChType} onChange={e => setNewChType(e.target.value as ChannelType)}
-                        style={{ ...inputStyle, flex: 1 }}>
+                  {categories.map(cat => (
+                    <div key={cat.id} className={styles.listItem}>
+                      <Layers size={14} className={styles.listIcon} />
+                      <span className={styles.listName}>{cat.name}</span>
+                      {isMod && <button className={styles.listDelete} onClick={() => deleteCategory(cat.id)}><Trash2 size={14} /></button>}
+                    </div>
+                  ))}
+                  {isMod && (
+                    <div className={styles.addRow}>
+                      <input className={styles.addInput} value={newCatName} onChange={e => setNewCatName(e.target.value)} placeholder="Yeni kategori..." onKeyDown={e => e.key === 'Enter' && handleAddCategory()} />
+                      <button className={styles.addBtn} onClick={handleAddCategory}><Plus size={14} /></button>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.sectionBlock}>
+                  <div className={styles.sectionHead}>
+                    <span>Kanallar</span>
+                    <span className={styles.count}>{channels.length}</span>
+                  </div>
+                  {channels.map(ch => (
+                    <div key={ch.id} className={styles.listItem}>
+                      <Hash size={14} className={styles.listIcon} />
+                      <span className={styles.listName}>{ch.name}</span>
+                      <span className={styles.listBadge}>{ch.type}</span>
+                      {isMod && <button className={styles.listDelete} onClick={() => deleteChannel(ch.id)}><Trash2 size={14} /></button>}
+                    </div>
+                  ))}
+                  {isMod && (
+                    <div className={styles.addForm}>
+                      <input className={styles.addInput} value={newChName} onChange={e => setNewChName(e.target.value)} placeholder="Kanal adi..." />
+                      <select className={styles.addSelect} value={newChType} onChange={e => setNewChType(e.target.value as ChannelType)}>
                         {CHANNEL_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                       </select>
-                      <select value={newChCat} onChange={e => setNewChCat(e.target.value)}
-                        style={{ ...inputStyle, flex: 1 }}>
+                      <select className={styles.addSelect} value={newChCat} onChange={e => setNewChCat(e.target.value)}>
                         <option value="">Kategorisiz</option>
                         {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
+                      <button className={styles.primaryBtn} onClick={handleAddChannel}>Olustur</button>
                     </div>
-                    <input value={newChDesc} onChange={e => setNewChDesc(e.target.value)} placeholder="Aciklama (opsiyonel)" style={inputStyle} />
-                    <button onClick={handleAddChannel} style={btnPrimary}>Kanal Olustur</button>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+                  )}
+                </div>
+              </>
+            )}
 
-          {tab === 'members' && (
-            <div style={section}>
-              <span style={label}>Uyeler ({members.length})</span>
-              {members.map(m => (
-                <div key={m.odocId} style={{ ...row, justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                      width: 32, height: 32, borderRadius: '50%',
-                      background: m.profile?.avatarColor ?? '#555',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#fff', fontWeight: 700, fontSize: 13,
-                    }}>
+            {tab === 'members' && (
+              <div className={styles.sectionBlock}>
+                <div className={styles.sectionHead}>
+                  <span>Uyeler</span>
+                  <span className={styles.count}>{members.length}</span>
+                </div>
+                {members.map(m => (
+                  <div key={m.odocId} className={styles.memberRow}>
+                    <div className={styles.memberAvatar} style={{ background: m.profile?.avatarColor ?? '#555' }}>
                       {m.profile?.username?.[0]?.toUpperCase() ?? '?'}
                     </div>
-                    <div>
-                      <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{m.profile?.username ?? '?'}</div>
-                      <div style={{ color: 'rgba(255,255,255,.35)', fontSize: 11 }}>{m.profile?.tag}</div>
+                    <div className={styles.memberInfo}>
+                      <div className={styles.memberName}>{m.profile?.username ?? '?'}</div>
+                      <div className={styles.memberTag}>{m.profile?.tag}</div>
                     </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {isOwner && m.userId !== user?.uid ? (
-                      <>
-                        <select value={m.role} onChange={e => updateMemberRole(m.odocId, e.target.value)}
-                          style={{ ...inputStyle, width: 'auto', padding: '4px 8px', fontSize: 11 }}>
-                          {ROLES.filter(r => r !== 'Founder').map(r => <option key={r} value={r}>{r}</option>)}
+                      <div className={styles.memberActions}>
+                        <select className={styles.roleSelect} value={m.role} onChange={e => updateMemberRole(m.odocId, e.target.value)}>
+                          <option value="Moderator">Moderator</option>
+                          <option value="Member">Member</option>
                         </select>
-                        <button onClick={() => { if (confirm(`${m.profile?.username} atilsin mi?`)) kickMember(m.odocId) }}
-                          style={{ background: 'none', border: 'none', color: '#e53935', cursor: 'pointer' }}>
+                        <button className={styles.kickBtn} onClick={() => { if (confirm(`${m.profile?.username} atilsin mi?`)) kickMember(m.odocId) }}>
                           <Trash2 size={14} />
                         </button>
-                      </>
+                      </div>
                     ) : (
-                      <span style={{
-                        padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
-                        background: m.role === 'Founder' ? 'rgba(229,57,53,.15)' : m.role === 'Moderator' ? 'rgba(91,141,239,.15)' : 'rgba(255,255,255,.06)',
-                        color: m.role === 'Founder' ? '#e53935' : m.role === 'Moderator' ? '#5b8def' : 'rgba(255,255,255,.5)',
-                      }}>
-                        <Shield size={10} style={{ marginRight: 4 }} />{m.role}
+                      <span className={`${styles.roleBadge} ${styles['role' + m.role]}`}>
+                        <Shield size={10} /> {m.role}
                       </span>
                     )}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {tab === 'invite' && (
-            <div style={section}>
-              <span style={label}>Davet Linki</span>
-              <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 13, marginBottom: 12 }}>
-                Bu linki paylasarak insanlari sunucuna davet edebilirsin.
-              </p>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input value={inviteLink} readOnly style={{ ...inputStyle, flex: 1, fontSize: 12 }} />
-                <button onClick={handleCopyInvite} style={btnPrimary}>
-                  {copied ? <Check size={14} /> : <Copy size={14} />}
-                </button>
+                ))}
               </div>
-              {copied && <p style={{ color: '#4fae4e', fontSize: 12, marginTop: 8 }}>Kopyalandi!</p>}
-            </div>
-          )}
-        </div>
+            )}
+
+            {tab === 'invite' && (
+              <div className={styles.inviteSection}>
+                <div className={styles.inviteIcon}>&#128279;</div>
+                <h3 className={styles.inviteTitle}>Arkadaslarini Davet Et</h3>
+                <p className={styles.inviteDesc}>Bu linki paylasarak insanlari sunucuna davet edebilirsin.</p>
+                <div className={styles.inviteRow}>
+                  <input className={styles.inviteInput} value={inviteLink} readOnly />
+                  <button className={styles.copyBtn} onClick={handleCopy}>
+                    {copied ? <><Check size={14} /> Kopyalandi</> : <><Copy size={14} /> Kopyala</>}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   )
