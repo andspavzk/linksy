@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+﻿import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './AuthContext'
 
@@ -93,7 +93,7 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const { user, profile } = useAuth()
+  const { user } = useAuth()
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [servers, setServers] = useState<DbServer[]>([])
   const [activeServerId, setActiveServerId] = useState<string | null>(null)

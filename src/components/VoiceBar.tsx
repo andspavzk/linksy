@@ -1,4 +1,4 @@
-import { useApp } from '../context/AppContext'
+﻿import { useApp } from '../context/AppContext'
 import styles from './VoiceBar.module.css'
 
 export function VoiceBar() {
@@ -8,24 +8,12 @@ export function VoiceBar() {
   return (
     <div className={styles.bar}>
       <span className={styles.dot} />
-      <span className={styles.channel}>🔊 {voiceState.channelName}'de bağlısın</span>
-      <div className={styles.users}>
-        {voiceState.participants.map(u => (
-          <div
-            key={u.id}
-            className={styles.uav}
-            style={{ background: u.avatarColor }}
-            title={u.username}
-          >
-            {u.avatar}
-          </div>
-        ))}
-      </div>
+      <span className={styles.channel}>🔊 {voiceState.channelName}'de baglısin</span>
       <button className={styles.btn} onClick={toggleMute}>
-        {voiceState.muted ? '🔇 Açık' : '🎙 Sessiz'}
+        {voiceState.muted ? '🔇 Acik' : '🎙 Sessiz'}
       </button>
-      <button className={`${styles.btn} ${styles.leave}`} onClick={leaveVoice}>
-        Ayrıl
+      <button className={${styles.btn} } onClick={leaveVoice}>
+        Ayril
       </button>
     </div>
   )
