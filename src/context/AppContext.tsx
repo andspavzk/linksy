@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import {
-  collection, doc, query, where, orderBy, limit, onSnapshot,
+  collection, doc, query, where, limit, onSnapshot,
   addDoc, deleteDoc, updateDoc, getDoc, serverTimestamp, getDocs,
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
@@ -119,14 +119,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!activeServerId) { setCategories([]); setChannels([]); setMembers([]); return }
 
     const unsubCats = onSnapshot(
-      query(collection(db, 'categories'), where('serverId', '==', activeServerId), orderBy('position')),
-      (snap) => setCategories(snap.docs.map(d => ({ id: d.id, ...d.data() } as Category)))
+      query(collection(db, 'categories'), where('serverId', '==', activeServerId)),
+      (snap) => {
+        const cats = snap.docs.map(d => ({ id: d.id, ...d.data() } as Category))
+        cats.sort((a, b) => a.position - b.position)
+        setCategories(cats)
+      }
     )
 
     const unsubChannels = onSnapshot(
-      query(collection(db, 'channels'), where('serverId', '==', activeServerId), orderBy('position')),
+      query(collection(db, 'channels'), where('serverId', '==', activeServerId)),
       (snap) => {
         const chs = snap.docs.map(d => ({ id: d.id, ...d.data() } as Channel))
+        chs.sort((a, b) => a.position - b.position)
         setChannels(chs)
         if (chs.length > 0) {
           const current = chs.find(c => c.id === activeChannelId)
@@ -171,8 +176,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const q = query(
       collection(db, 'messages'),
       where('channelId', '==', activeChannelId),
-      orderBy('createdAt', 'asc'),
-      limit(100)
+      limit(200)
     )
 
     const unsub = onSnapshot(q, async (snap) => {
@@ -191,10 +195,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
           content: data.content,
           replyTo: data.replyTo || null,
           edited: data.edited || false,
+          pinned: data.pinned || false,
+          reactions: data.reactions || {},
           createdAt: data.createdAt?.toMillis?.() || data.createdAt || Date.now(),
           author,
         })
       }
+      msgs.sort((a, b) => a.createdAt - b.createdAt)
       setMessages(msgs)
       setMessagesLoading(false)
     })
@@ -254,30 +261,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!activeChannelId) { setPinnedMessages([]); return }
-    const q = query(
-      collection(db, 'messages'),
-      where('channelId', '==', activeChannelId),
-      where('pinned', '==', true)
-    )
-    const unsub = onSnapshot(q, async (snap) => {
-      const pins: Message[] = []
-      for (const d of snap.docs) {
-        const data = d.data()
-        let author: Profile | undefined
-        try {
-          const pDoc = await getDoc(doc(db, 'profiles', data.authorId))
-          if (pDoc.exists()) author = pDoc.data() as Profile
-        } catch {}
-        pins.push({
-          id: d.id, channelId: data.channelId, authorId: data.authorId,
-          content: data.content, replyTo: null, edited: data.edited || false,
-          pinned: true, createdAt: data.createdAt?.toMillis?.() || Date.now(), author,
-        })
-      }
-      setPinnedMessages(pins)
-    })
-    return () => unsub()
-  }, [activeChannelId])
+    setPinnedMessages(messages.filter(m => m.pinned))
+  }, [activeChannelId, messages])
 
   const searchMessages = useCallback(async (term: string): Promise<Message[]> => {
     if (!activeChannelId || term.length < 2) return []
@@ -373,9 +358,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const sDoc = await getDoc(doc(db, 'servers', serverId))
     if (!sDoc.exists()) return 'Sunucu bulunamadi'
     const existing = await getDocs(
-      query(collection(db, 'serverMembers'), where('serverId', '==', serverId), where('userId', '==', user.uid))
+      query(collection(db, 'serverMembers'), where('serverId', '==', serverId))
     )
-    if (!existing.empty) return 'Zaten bu sunucudasin'
+    const alreadyMember = existing.docs.some(d => d.data().userId === user.uid)
+    if (alreadyMember) return 'Zaten bu sunucudasin'
     await addDoc(collection(db, 'serverMembers'), {
       serverId, userId: user.uid, role: 'Member', joinedAt: Date.now(),
     })

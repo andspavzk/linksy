@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import {
-  collection, doc, query, where, orderBy, limit, onSnapshot,
+  collection, doc, query, where, limit, onSnapshot,
   addDoc, deleteDoc, updateDoc, getDoc, getDocs, serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
@@ -121,8 +121,7 @@ export function DmProvider({ children }: { children: ReactNode }) {
     const q = query(
       collection(db, 'dmMessages'),
       where('dmChannelId', '==', activeDmId),
-      orderBy('createdAt', 'asc'),
-      limit(100)
+      limit(200)
     )
     const unsub = onSnapshot(q, async (snap) => {
       const msgs: Message[] = []
@@ -140,6 +139,7 @@ export function DmProvider({ children }: { children: ReactNode }) {
           author,
         })
       }
+      msgs.sort((a, b) => a.createdAt - b.createdAt)
       setDmMessages(msgs)
       setDmLoading(false)
     })
