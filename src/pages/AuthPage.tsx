@@ -1,15 +1,17 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Eye, EyeOff, Mail, Lock, User, Chrome } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, Chrome, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import styles from './AuthPage.module.css'
 
 type Mode = 'login' | 'register'
+type View = 'form' | 'forgot' | 'email-sent' | 'confirm-email'
 
 export default function AuthPage({ mode }: { mode: Mode }) {
   const navigate = useNavigate()
-  const { signIn, signUp, signInWithGoogle } = useAuth()
+  const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth()
 
+  const [view, setView] = useState<View>('form')
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -26,6 +28,11 @@ export default function AuthPage({ mode }: { mode: Mode }) {
       if (username.trim().length < 2) { setError('Kullanıcı adı en az 2 karakter olmalı.'); setLoading(false); return }
       if (password.length < 6) { setError('Şifre en az 6 karakter olmalı.'); setLoading(false); return }
       const err = await signUp(email, password, username.trim())
+      if (err === 'CONFIRM_EMAIL') {
+        setView('confirm-email')
+        setLoading(false)
+        return
+      }
       if (err) { setError(err); setLoading(false); return }
       navigate('/app')
     } else {
@@ -37,9 +44,102 @@ export default function AuthPage({ mode }: { mode: Mode }) {
     setLoading(false)
   }
 
+  async function handleForgotPassword(e: FormEvent) {
+    e.preventDefault()
+    if (!email.trim()) { setError('E-posta adresini gir.'); return }
+    setError(null)
+    setLoading(true)
+    const err = await resetPassword(email.trim())
+    if (err) { setError(err); setLoading(false); return }
+    setView('email-sent')
+    setLoading(false)
+  }
+
   async function handleGoogle() {
     setError(null)
     await signInWithGoogle()
+  }
+
+  if (view === 'confirm-email') {
+    return (
+      <div className={styles.page}>
+        <div className={styles.glow} />
+        <div className={styles.glow2} />
+        <div className={styles.card}>
+          <div className={styles.successIcon}>📧</div>
+          <h1 className={styles.title}>E-postanı kontrol et</h1>
+          <p className={styles.subtitle}>
+            <strong>{email}</strong> adresine onay bağlantısı gönderdik.
+            Bağlantıya tıklayarak hesabını aktif edebilirsin.
+          </p>
+          <p className={styles.subtitle} style={{ marginTop: 8, opacity: 0.6, fontSize: 13 }}>
+            E-posta gelmedi mi? Spam klasörünü kontrol et.
+          </p>
+          <button className={styles.submitBtn} onClick={() => { setView('form'); setError(null) }} style={{ marginTop: 16 }}>
+            Giriş sayfasına dön
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'email-sent') {
+    return (
+      <div className={styles.page}>
+        <div className={styles.glow} />
+        <div className={styles.glow2} />
+        <div className={styles.card}>
+          <div className={styles.successIcon}>✉️</div>
+          <h1 className={styles.title}>Bağlantı gönderildi</h1>
+          <p className={styles.subtitle}>
+            <strong>{email}</strong> adresine şifre sıfırlama bağlantısı gönderdik.
+            E-postadaki linke tıklayarak yeni şifreni belirleyebilirsin.
+          </p>
+          <button className={styles.submitBtn} onClick={() => { setView('form'); setError(null) }} style={{ marginTop: 16 }}>
+            Giriş sayfasına dön
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'forgot') {
+    return (
+      <div className={styles.page}>
+        <div className={styles.glow} />
+        <div className={styles.glow2} />
+        <div className={styles.card}>
+          <button className={styles.backLink} onClick={() => { setView('form'); setError(null) }}>
+            <ArrowLeft size={14} /> Geri dön
+          </button>
+          <h1 className={styles.title}>Şifreni sıfırla</h1>
+          <p className={styles.subtitle}>
+            E-posta adresini gir, sana sıfırlama bağlantısı gönderelim.
+          </p>
+          <form className={styles.form} onSubmit={handleForgotPassword}>
+            <div className={styles.field}>
+              <label className={styles.label}>E-posta</label>
+              <div className={styles.inputWrap}>
+                <Mail size={16} className={styles.inputIcon} />
+                <input
+                  className={styles.input}
+                  type="email"
+                  placeholder="sen@ornek.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </div>
+            </div>
+            {error && <div className={styles.error}>{error}</div>}
+            <button className={styles.submitBtn} type="submit" disabled={loading}>
+              {loading ? <span className={styles.spinner} /> : 'Sıfırlama Bağlantısı Gönder'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -113,7 +213,9 @@ export default function AuthPage({ mode }: { mode: Mode }) {
             <label className={styles.label}>
               Şifre
               {mode === 'login' && (
-                <a href="#" className={styles.forgotLink}>Şifremi unuttum</a>
+                <button type="button" className={styles.forgotLink} onClick={() => { setView('forgot'); setError(null) }}>
+                  Şifremi unuttum
+                </button>
               )}
             </label>
             <div className={styles.inputWrap}>

@@ -1,11 +1,24 @@
-import { MessageSquare, Volume2, Users, Settings } from 'lucide-react'
+import { useState } from 'react'
+import { MessageSquare, Volume2, Users, Settings, Plus, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { MOCK_SERVER, OTHER_SERVERS } from '../data/mock'
 import styles from './Rail.module.css'
 import clsx from 'clsx'
 
 export function Rail() {
-  const { theme, toggleTheme } = useApp()
+  const { theme, toggleTheme, servers, activeServerId, setActiveServerId, createServer } = useApp()
+  const [showCreate, setShowCreate] = useState(false)
+  const [serverName, setServerName] = useState('')
+  const [creating, setCreating] = useState(false)
+
+  async function handleCreate() {
+    if (!serverName.trim()) return
+    setCreating(true)
+    const initials = serverName.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+    await createServer(serverName.trim(), initials)
+    setServerName('')
+    setShowCreate(false)
+    setCreating(false)
+  }
 
   return (
     <nav className={styles.rail}>
@@ -27,28 +40,63 @@ export function Rail() {
 
       <div className={styles.sep} />
 
-      <div
-        className={clsx(styles.server, styles.serverActive)}
-        style={{ background: MOCK_SERVER.color }}
-        title={MOCK_SERVER.name}
-      >
-        {MOCK_SERVER.initials}
-      </div>
-
-      {OTHER_SERVERS.map(s => (
+      {servers.map(s => (
         <div
           key={s.id}
-          className={styles.server}
+          className={clsx(styles.server, s.id === activeServerId && styles.serverActive)}
           style={{ background: s.color }}
           title={s.name}
+          onClick={() => setActiveServerId(s.id)}
         >
           {s.initials}
-          {s.badge && <span className={styles.badge}>{s.badge}</span>}
         </div>
       ))}
 
       <div className={styles.sep} />
-      <div className={styles.addBtn} title="Sunucu Ekle">+</div>
+      <div className={styles.addBtn} title="Sunucu Ekle" onClick={() => setShowCreate(true)}>+</div>
+
+      {showCreate && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+        }} onClick={() => setShowCreate(false)}>
+          <div style={{
+            background: '#1a1a2e', borderRadius: 16, padding: 24, width: 340,
+            border: '1px solid rgba(255,255,255,.08)',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ color: '#fff', margin: 0, fontSize: 16 }}>Yeni Sunucu Oluştur</h3>
+              <button onClick={() => setShowCreate(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <input
+              value={serverName}
+              onChange={e => setServerName(e.target.value)}
+              placeholder="Sunucu adı..."
+              style={{
+                width: '100%', padding: '10px 14px', borderRadius: 10,
+                background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)',
+                color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+              }}
+              onKeyDown={e => e.key === 'Enter' && handleCreate()}
+              autoFocus
+            />
+            <button
+              onClick={handleCreate}
+              disabled={creating || !serverName.trim()}
+              style={{
+                marginTop: 12, width: '100%', padding: '10px 0', borderRadius: 10,
+                background: 'linear-gradient(135deg,#5b8def,#7b5ea7)', border: 'none',
+                color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                opacity: creating || !serverName.trim() ? 0.5 : 1,
+              }}
+            >
+              {creating ? 'Oluşturuluyor...' : 'Oluştur'}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className={styles.bottom}>
         <button

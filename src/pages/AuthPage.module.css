@@ -127,8 +127,26 @@
   color: #5b8def;
   text-decoration: none;
   font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 .forgotLink:hover { text-decoration: underline; }
+
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.5);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+}
+.backLink:hover { color: #fff; }
 
 .inputWrap {
   position: relative;

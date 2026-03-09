@@ -31,6 +31,91 @@
   white-space: nowrap;
 }
 
+.msgRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  position: relative;
+}
+.msgRow:hover {
+  background: rgba(255,255,255,.03);
+}
+.msgRow.compact {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.avatarSpacer {
+  width: 36px;
+  flex-shrink: 0;
+}
+.msgBody {
+  flex: 1;
+  min-width: 0;
+}
+.msgHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.authorName {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--t1, #fff);
+}
+.tag {
+  font-size: 11px;
+  color: var(--t3, rgba(255,255,255,.35));
+}
+.time {
+  font-size: 10.5px;
+  color: var(--t3, rgba(255,255,255,.3));
+}
+.msgContent {
+  font-size: 13.5px;
+  color: var(--t2, rgba(255,255,255,.8));
+  line-height: 1.45;
+  word-break: break-word;
+}
+.msgActions {
+  display: none;
+  gap: 4px;
+  position: absolute;
+  right: 8px;
+  top: 4px;
+}
+.msgRow:hover .msgActions {
+  display: flex;
+}
+.msgActions button {
+  background: var(--card, rgba(255,255,255,.06));
+  border: 1px solid var(--border, rgba(255,255,255,.08));
+  border-radius: 6px;
+  color: var(--t3, rgba(255,255,255,.4));
+  cursor: pointer;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+}
+.msgActions button:hover {
+  color: #fff;
+  background: rgba(255,255,255,.1);
+}
+
 .typing {
   display: flex;
   align-items: center;

@@ -1,17 +1,16 @@
 import { Phone, Video, Users, Search, Hash } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { MOCK_SERVER } from '../data/mock'
 import { ChannelIcon } from './ChannelIcon'
 import styles from './ChatHeader.module.css'
 
 export function ChatHeader() {
-  const { activeChannelId } = useApp()
-  const channel = MOCK_SERVER.channels.find(c => c.id === activeChannelId)
+  const { activeChannelId, channels } = useApp()
+  const channel = channels.find(c => c.id === activeChannelId)
   if (!channel) return null
 
   return (
     <header className={styles.header}>
-      <ChannelIcon type={channel.type} size={19} className={styles.chIcon} />
+      <ChannelIcon type={channel.type as any} size={19} className={styles.chIcon} />
       <span className={styles.name}>{channel.name}</span>
       {channel.description && (
         <span className={styles.topic}>{channel.description}</span>

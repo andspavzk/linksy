@@ -20,6 +20,8 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<string | null>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
+  resetPassword: (email: string) => Promise<string | null>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -75,40 +77,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false)
   }
 
+  async function refreshProfile() {
+    if (user) await loadProfile(user.id)
+  }
+
   async function signUp(email: string, password: string, username: string): Promise<string | null> {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username: username.trim() },
+        emailRedirectTo: window.location.origin + '/auth/callback',
+      },
+    })
     if (error) return error.message
+
     if (data.user) {
-      await supabase.from('profiles').insert({
+      await supabase.from('profiles').upsert({
         id: data.user.id,
-        username,
+        username: username.trim(),
         tag: randomTag(),
         avatar_color: randomColor(),
         status: 'online',
         activity: null,
       })
     }
-    return null
+
+    if (data.session) {
+      return null
+    }
+
+    return 'CONFIRM_EMAIL'
   }
 
   async function signIn(email: string, password: string): Promise<string | null> {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return error ? error.message : null
+    if (error) return error.message
+    if (user) {
+      await supabase.from('profiles').update({ status: 'online' }).eq('id', user.id)
+    }
+    return null
   }
 
   async function signInWithGoogle() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/app' },
+      options: { redirectTo: window.location.origin + '/auth/callback' },
     })
   }
 
+  async function resetPassword(email: string): Promise<string | null> {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-password',
+    })
+    return error ? error.message : null
+  }
+
   async function signOut() {
+    if (user) {
+      await supabase.from('profiles').update({ status: 'offline' }).eq('id', user.id)
+    }
     await supabase.auth.signOut()
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signUp, signIn, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, signUp, signIn, signInWithGoogle, signOut, resetPassword, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
