@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
 import { AuthProvider } from './context/AuthContext'
+import { DmProvider } from './context/DmContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { ChatLayout } from './components/ChatLayout'
 import { BetaBanner } from './components/BetaBanner'
@@ -26,7 +27,9 @@ function ThemedApp() {
 function AppWrapper() {
   return (
     <AppProvider>
-      <ThemedApp />
+      <DmProvider>
+        <ThemedApp />
+      </DmProvider>
     </AppProvider>
   )
 }

@@ -10,6 +10,8 @@ export interface Profile {
   activity: string | null
   email: string
   createdAt: number
+  bio?: string
+  banner?: string
 }
 
 export interface Server {
@@ -45,8 +47,34 @@ export interface Message {
   content: string
   replyTo: string | null
   edited: boolean
+  pinned?: boolean
   createdAt: number
+  editedAt?: number
   author?: Profile
+  reactions?: Record<string, string[]>
+}
+
+export interface Reaction {
+  emoji: string
+  users: string[]
+}
+
+export interface DmChannel {
+  id: string
+  participants: string[]
+  lastMessage: string | null
+  lastMessageAt: number | null
+  createdAt: number
+}
+
+export interface FriendRequest {
+  id: string
+  fromId: string
+  toId: string
+  status: 'pending' | 'accepted' | 'rejected'
+  createdAt: number
+  fromProfile?: Profile
+  toProfile?: Profile
 }
 
 export interface ServerMember {

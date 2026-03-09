@@ -42,6 +42,10 @@
 .msgRow:hover {
   background: rgba(255,255,255,.03);
 }
+.msgRow.pinned {
+  border-left: 2px solid #f5c542;
+  background: rgba(245,197,66,.03);
+}
 .msgRow.compact {
   padding-top: 1px;
   padding-bottom: 1px;
