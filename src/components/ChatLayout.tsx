@@ -5,12 +5,13 @@ import { Sidebar } from './Sidebar'
 import { ChatMain } from './ChatMain'
 import { MembersPanel } from './MembersPanel'
 import { ServerSettingsModal } from './ServerSettingsModal'
-import { DmPanel } from './DmPanel'
+import { DmSidebar } from './DmSidebar'
 import { DmChat } from './DmChat'
+import { FriendsPage } from './FriendsPage'
 import { useDm } from '../context/DmContext'
 
 export function ChatLayout() {
-  const { isDmMode } = useDm()
+  const { isDmMode, activeDmId } = useDm()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -27,15 +28,8 @@ export function ChatLayout() {
         <Rail />
         {isDmMode ? (
           <>
-            <aside style={isMobile ? {
-              position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 200,
-              width: 280, transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
-              transition: 'transform .25s cubic-bezier(.2,0,0,1)',
-              boxShadow: sidebarOpen ? '4px 0 24px rgba(0,0,0,.5)' : 'none',
-            } : undefined}>
-              <DmPanel />
-            </aside>
-            <DmChat />
+            <DmSidebar />
+            {activeDmId ? <DmChat /> : <FriendsPage />}
           </>
         ) : (
           <>
@@ -54,10 +48,7 @@ export function ChatLayout() {
       </div>
 
       {isMobile && sidebarOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)',
-          zIndex: 199,
-        }} onClick={() => setSidebarOpen(false)} />
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 199 }} onClick={() => setSidebarOpen(false)} />
       )}
 
       <ServerSettingsModal />
