@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
-import { Trash2, Reply, Pencil, Pin, SmilePlus } from 'lucide-react'
+import { Trash2, Reply, Pencil, Pin, SmilePlus, Bookmark } from 'lucide-react'
 import { ProfilePopup } from './ProfilePopup'
 import styles from './MessageList.module.css'
 
@@ -147,6 +147,18 @@ export function MessageList() {
               <div className={styles.msgActions}>
                 <button title="Reaksiyon" onClick={(e) => { e.stopPropagation(); setEmojiPickerFor(emojiPickerFor === msg.id ? null : msg.id) }}>
                   <SmilePlus size={13} />
+                </button>
+                <button title="Kaydet" onClick={async () => {
+                  const { addDoc, collection } = await import('firebase/firestore')
+                  const { db } = await import('../lib/firebase')
+                  if (!user) return
+                  await addDoc(collection(db, 'savedMessages'), {
+                    userId: user.uid, messageId: msg.id, content: msg.content,
+                    authorName: msg.author?.username ?? '?', authorColor: msg.author?.avatarColor ?? '#555',
+                    channelId: msg.channelId, savedAt: Date.now(),
+                  })
+                }}>
+                  <Bookmark size={13} />
                 </button>
                 <button title="Yanitla" onClick={() => setReplyTo(msg)}>
                   <Reply size={13} />

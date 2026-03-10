@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import styles from './ChatMain.module.css'
 import { ChatHeader } from './ChatHeader'
 import { VoiceBar } from './VoiceBar'
 import { MessageList } from './MessageList'
 import { MessageInput } from './MessageInput'
+import { SearchPanel } from './SearchPanel'
 import { useApp } from '../context/AppContext'
 import { Menu } from 'lucide-react'
 
@@ -14,6 +16,11 @@ interface Props {
 export function ChatMain({ onMenuClick, isMobile }: Props) {
   const { activeChannelId, voiceState, channels } = useApp()
   const channel = channels.find(c => c.id === activeChannelId)
+  const [panelTab, setPanelTab] = useState<'search' | 'pinned' | 'saved' | null>(null)
+
+  function togglePanel(tab: 'search' | 'pinned' | 'saved') {
+    setPanelTab(prev => prev === tab ? null : tab)
+  }
 
   if (!activeChannelId || !channel) {
     return (
@@ -31,24 +38,26 @@ export function ChatMain({ onMenuClick, isMobile }: Props) {
         }}>
           <span style={{ fontSize: 48, opacity: .5 }}>&#128172;</span>
           <span style={{ fontSize: 16, fontWeight: 600 }}>Bir kanal sec veya sunucu olustur</span>
-          {isMobile && <span style={{ fontSize: 13 }}>Sol menu icin yana kaydir</span>}
         </div>
       </main>
     )
   }
 
   return (
-    <main className={styles.main}>
-      <ChatHeader onMenuClick={onMenuClick} isMobile={isMobile} />
-      {channel.description && (
-        <div className={styles.chDesc}>
-          <div className={styles.chDescTitle}>#{channel.name}</div>
-          <div className={styles.chDescSub}>{channel.description}</div>
-        </div>
-      )}
-      {voiceState.connected && <VoiceBar />}
-      <MessageList />
-      <MessageInput />
-    </main>
+    <div style={{ flex: 1, display: 'flex', minWidth: 0 }}>
+      <main className={styles.main}>
+        <ChatHeader onMenuClick={onMenuClick} isMobile={isMobile} onPanelToggle={togglePanel} />
+        {channel.description && (
+          <div className={styles.chDesc}>
+            <div className={styles.chDescTitle}>#{channel.name}</div>
+            <div className={styles.chDescSub}>{channel.description}</div>
+          </div>
+        )}
+        {voiceState.connected && <VoiceBar />}
+        <MessageList />
+        <MessageInput />
+      </main>
+      <SearchPanel visible={!!panelTab} onClose={() => setPanelTab(null)} initialTab={panelTab ?? 'search'} />
+    </div>
   )
 }
