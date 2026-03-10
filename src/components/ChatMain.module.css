@@ -23,3 +23,30 @@
   color: var(--t2);
   line-height: 1.5;
 }
+
+.mobileHeader {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(0,0,0,.24);
+  box-shadow: 0 1px 0 rgba(0,0,0,.2);
+  flex-shrink: 0;
+}
+.menuBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  background: none;
+  border: none;
+  color: var(--t2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mobileTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--t1);
+}

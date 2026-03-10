@@ -41,3 +41,17 @@
   transition: all .15s;
 }
 .btn:hover { background: var(--bg-hover); color: var(--t1); }
+
+.menuBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  background: none;
+  border: none;
+  color: var(--t2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+}
+.menuBtn:hover { background: var(--bg-hover); color: var(--t1); }

@@ -135,3 +135,34 @@ a:hover { text-decoration: underline; }
   animation: spin .6s linear infinite;
   display: inline-block;
 }
+
+/* ============ MOBILE RESPONSIVE ============ */
+
+/* Safe area for notched phones */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Mobile: hide sidebar rail, make sidebar overlay */
+@media (max-width: 768px) {
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Touch optimizations */
+  button, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  :root {
+    --mobile-rail-width: 0px;
+    --mobile-sidebar-width: 0px;
+  }
+}

@@ -311,3 +311,26 @@
   animation: spin .6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============ MOBILE ============ */
+@media (max-width: 768px) {
+  .page { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; overflow: visible; }
+  .sidebarInner { width: 100%; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .userCard { display: none; }
+  .navGroup { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 0; }
+  .navGroupTitle { display: none; }
+  .navBtn { width: auto; padding: 8px 14px; font-size: 13px; border-radius: 20px; background: rgba(255,255,255,.04); }
+  .navBtnActive { background: rgba(255,255,255,.1) !important; }
+  .navArrow { display: none; }
+  .navDivider { display: none; }
+  .logoutBtn { width: auto; padding: 8px 14px; font-size: 13px; border-radius: 20px; }
+  .sidebarFooter { display: none; }
+  .main { overflow-y: auto; }
+  .mainInner { padding: 20px 16px 100px; max-width: 100%; }
+  .closeBtn { position: absolute; top: 12px; right: 12px; }
+  .editGrid { flex-direction: column; }
+  .editRight { width: 100%; }
+  .profileCardBody { flex-wrap: wrap; }
+  .saveBar { left: 0; margin: 0; border-radius: 0; }
+}

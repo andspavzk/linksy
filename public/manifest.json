@@ -1,0 +1,24 @@
+{
+  "name": "Linksy",
+  "short_name": "Linksy",
+  "description": "Discord alternatifi - gercek zamanli mesajlasma platformu",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#1e1f22",
+  "theme_color": "#5865f2",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
